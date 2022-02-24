@@ -8,41 +8,90 @@
     <script type="text/paperscript" canvas="canvas">
 
         var path;
-        var inPath = false;
+
+        var rect = new Rectangle();
+        rect.left = 400;
+        rect.right = 500;
+        rect.bottom = 400;
+        rect.top = 200;
+
+        var rectPath = new Path.Rectangle(rect);
+        rectPath.strokeColor='black';
+
+        var vp = new Point(100,350);
+        var horizonPath = new Path();
+        horizonPath.strokeColor='black';
+        horizonPath.add(new Point(30, vp.y), new Point(600, vp.y));
+
+        var vpCircle = new Path.Circle(vp, 3);
+        vpCircle.fillColor='black';
+
+        var topLeftCircle = new Path.Circle(new Point(0, 0), 3);
+        topLeftCircle.position = new Point(rect.left, rect.top);
+        topLeftCircle.fillColor='black';
+        topLeftCircle.strokeColor='black';
+        topLeftCircle.strokeWidth=0;
+
+        var selectedVertex = "none";
+        var activePath = "none";
+
+        var topLeftPath = new Path();
+        var topRightPath = new Path();
+        var botLeftPath = new Path();
+        var botRightPath = new Path();
+
+        var topLeftPathTest = new Path();
+        topLeftPathTest.strokeColor = 'transparent';
+        topLeftPathTest.add(new Point(rect.left, rect.top));
+        topLeftPathTest.add(vp);
+
 
         function onMouseDrag(event) {
-            if (path.segments.length < 2) {
-                path.add(event.point);
+            if (activePath == "none") return;
+            if (activePath == "topLeft") {
+                if (topLeftPath.segments.length < 2) {
+                    topLeftPath.add(event.point);
+                }
+                topLeftPath.segments[1].point.x = event.point.x + 50;
+                topLeftPath.segments[1].point.y = event.point.y;
             }
-            //path.add(event.point);
-            path.segments[1].point.x = event.point.x + 50;
-            path.segments[1].point.y = event.point.y - 75;
             
-
-            //console.log(event.point);
-            //console.log(path.segments[1].point);
         }
         
         function onMouseDown(event) {
-            if (inPath == false) {
-                // Create a path:
-                path = new Path();
-                path.strokeColor = 'black';
-                // Add the mouse down position:
-                path.add(event.point);
+            if (selectedVertex == "none") return;
+            if (selectedVertex == "topLeft") {  
+                topLeftPath.strokeColor = 'black';
+                topLeftPath.add(new Point(rect.left, rect.top));
+                activePath = "topLeft";
+
+                topLeftPathTest.strokeColor='transparent';
             }
         }
-        /*
-        function onMouseUp(event) {
-            if (inPath == false) {
-                inPath = true;
 
+        function onMouseMove(event) {
+            var delta = event.point - topLeftCircle.position;
+            var dist = Math.sqrt(Math.pow(delta.x,2) + Math.pow(delta.y,2));
+            if (dist < 50) {
+                topLeftCircle.strokeWidth=10;
+                selectedVertex = "topLeft";
             } else {
-                // Add the mouse up position:
-                path.add(event.point);
-                inPath = false;
-            }
-        }*/
+                topLeftCircle.strokeWidth=0;
+                if (selectedVertex == "topLeft") selectedVertex = "none";
+            }  
+        }
+
+        function onMouseUp(event) {
+            if (activePath == "topLeft") testTopLeftPath();
+            activePath = "none";
+
+        }
+
+        function testTopLeftPath() {
+            topLeftPathTest.strokeColor='red';
+            
+            
+        }
     </script>
 </head>
 <body>
