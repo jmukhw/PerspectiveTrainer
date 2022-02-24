@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Perspective Trainer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="text/javascript" src="node_modules/paper/dist/paper-full.js"></script>
+    <script type="text/paperscript" canvas="canvas">
+
+        var path;
+        var inPath = false;
+
+        function onMouseDrag(event) {
+            if (path.segments.length < 2) {
+                path.add(event.point);
+            }
+            //path.add(event.point);
+            path.segments[1].point.x = event.point.x;
+            path.segments[1].point.y = event.point.y;
+            
+
+            //console.log(event.point);
+            //console.log(path.segments[1].point);
+        }
+        
+        function onMouseDown(event) {
+            if (inPath == false) {
+                // Create a path:
+                path = new Path();
+                path.strokeColor = 'black';
+                // Add the mouse down position:
+                path.add(event.point);
+            }
+        }
+        /*
+        function onMouseUp(event) {
+            if (inPath == false) {
+                inPath = true;
+
+            } else {
+                // Add the mouse up position:
+                path.add(event.point);
+                inPath = false;
+            }
+        }*/
+    </script>
+</head>
+<body>
+    <canvas id="canvas" resize></canvas>
+</body>
+</html>
