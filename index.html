@@ -54,13 +54,13 @@
         var activePath = "none";
 
         var topLeftPath = new Path();
-        topLeftPath.strokeColor = 'black';
+        topLeftPath.strokeColor = 'transparent';
         var topRightPath = new Path();
-        topRightPath.strokeColor = 'black';
+        topRightPath.strokeColor = 'transparent';
         var botLeftPath = new Path();
-        botLeftPath.strokeColor = 'black';
+        botLeftPath.strokeColor = 'transparent';
         var botRightPath = new Path();
-        botRightPath.strokeColor = 'black';
+        botRightPath.strokeColor = 'transparent';
 
         var topLeftPathTest = new Path();
         topLeftPathTest.strokeColor = 'transparent';
@@ -82,6 +82,39 @@
         botRightPathTest.add(new Point(rect.right, rect.bottom));
         botRightPathTest.add(vp);
 
+        var backPathColor = 'grey';
+        var backTopPath = new Path();
+        backTopPath.strokeColor = 'trasparent';
+        backTopPath.add(new Point(0,0), new Point(0,0));
+        var backLeftPath = new Path();
+        backLeftPath.strokeColor = 'trasparent';
+        backLeftPath.add(new Point(0,0), new Point(0,0));
+        var backRightPath = new Path();
+        backRightPath.strokeColor = 'trasparent';
+        backRightPath.add(new Point(0,0), new Point(0,0));
+        var backBotPath = new Path();
+        backBotPath.strokeColor = 'trasparent';
+        backBotPath.add(new Point(0,0), new Point(0,0));
+
+        var buttonTest = new Path.Rectangle(new Rectangle(10,10,100,35),6);
+        buttonTest.fillColor='#00000011';
+        var buttonTestText = new PointText(buttonTest.position);
+        buttonTestText.content = 'Test';
+        buttonTestText.justification = 'center';
+        buttonTestText.fillColor = 'black';
+        buttonTestText.onMouseDown = buttonTest.onMouseDown = function(event) { testAll(); buttonTest.fillColor = '#00000033';}
+        buttonTestText.onMouseUp = buttonTest.onMouseUp = function(event) { hideAllTestPaths(); buttonTest.fillColor = '#00000011';}
+        
+        var scorePanel = new Path.Rectangle(new Rectangle(120,10,200,35),6);
+        scorePanel.fillColor='#00000011';
+        var scoreLabelText = new PointText(scorePanel.position + new Point(-80, 0));
+        scoreLabelText.content = 'Score:';
+        scoreLabelText.justification = 'left';
+        scoreLabelText.fillColor = 'black';
+        var scoreValueText = new PointText(scorePanel.position + new Point(-40, 0));
+        scoreValueText.content = '0';
+        scoreValueText.justification = 'left';
+        scoreValueText.fillColor = 'black';
 
         function onMouseDrag(event) {
             if (activePath == "none") return;
@@ -93,21 +126,25 @@
                 if (vp.x < rect.left) xoffset = -xoffset;
                 topLeftPath.segments[1].point.x = event.point.x + xoffset;
                 topLeftPath.segments[1].point.y = event.point.y;
+                topLeftCircle.position = new Point(event.point.x + xoffset, event.point.y);
             } else if (activePath == "topRight") {
                 if (topRightPath.segments.length < 2) topRightPath.add(event.point);
                 if (vp.x < rect.right) xoffset = -xoffset;
                 topRightPath.segments[1].point.x = event.point.x + xoffset;
                 topRightPath.segments[1].point.y = event.point.y;
+                topRightCircle.position = new Point(event.point.x + xoffset, event.point.y);
             } else if (activePath == "botLeft") {
                 if (botLeftPath.segments.length < 2) botLeftPath.add(event.point);
                 if (vp.x < rect.left) xoffset = -xoffset;
                 botLeftPath.segments[1].point.x = event.point.x + xoffset;
                 botLeftPath.segments[1].point.y = event.point.y;
+                botLeftCircle.position = new Point(event.point.x + xoffset, event.point.y);
             } else if (activePath == "botRight") {
                 if (botRightPath.segments.length < 2) botRightPath.add(event.point);
                 if (vp.x < rect.right) xoffset = -xoffset;
                 botRightPath.segments[1].point.x = event.point.x + xoffset;
                 botRightPath.segments[1].point.y = event.point.y;
+                botRightCircle.position = new Point(event.point.x + xoffset, event.point.y);
             }
             
         }
@@ -115,18 +152,36 @@
         function onMouseDown(event) {
             if (selectedVertex == "none") return;
             hideAllTestPaths();
+            resetVertexStrokeWidth();
             if (selectedVertex == "topLeft") {  
                 topLeftPath.add(new Point(rect.left, rect.top));
                 activePath = "topLeft";
+                topLeftPath.strokeColor='transparent';
+                
+                backLeftPath.strokeColor = 'transparent';
+                backTopPath.strokeColor = 'transparent';
+
             } else if (selectedVertex == "topRight") {  
                 topRightPath.add(new Point(rect.right, rect.top));
                 activePath = "topRight";
+                topRightPath.strokeColor='transparent';
+                
+                backRightPath.strokeColor = 'transparent';
+                backTopPath.strokeColor = 'transparent';
             } else if (selectedVertex == "botLeft") {  
                 botLeftPath.add(new Point(rect.left, rect.bottom));
                 activePath = "botLeft";
+                botLeftPath.strokeColor='transparent';
+
+                backLeftPath.strokeColor = 'transparent';
+                backBotPath.strokeColor = 'transparent';
             } else if (selectedVertex == "botRight") {  
                 botRightPath.add(new Point(rect.right, rect.bottom));
                 activePath = "botRight";
+                botRightPath.strokeColor='transparent';
+
+                backRightPath.strokeColor = 'transparent';
+                backBotPath.strokeColor = 'transparent';
             }
         }
 
@@ -146,15 +201,51 @@
             } else if (dist(event.point, botRightCircle.position) < grabDist) {
                 botRightCircle.strokeWidth=circleGrowWidth;
                 selectedVertex = "botRight";
+            } else {
+                selectedVertex = "none";
             }
         }
 
         function onMouseUp(event) {
-            if (activePath == "topLeft") testTopLeftPath();
-            else if (activePath == "topRight") testTopRightPath();
-            else if (activePath == "botLeft") testBotLeftPath();
-            else if (activePath == "botRight") testBotRightPath();
+            if (activePath == "topLeft") {
+                topLeftPath.strokeColor = 'black';
+            } else if (activePath == "topRight") {
+                topRightPath.strokeColor = 'black';
+            } else if (activePath == "botLeft"){
+                botLeftPath.strokeColor = 'black';
+            } else if (activePath == "botRight") {
+                botRightPath.strokeColor = 'black';
+            }
             activePath = "none";
+            selectedVertex = "none";
+            topLeftCircle.position = new Point(rect.left, rect.top);
+            topRightCircle.position = new Point(rect.right, rect.top);
+            botLeftCircle.position = new Point(rect.left, rect.bottom);
+            botRightCircle.position = new Point(rect.right, rect.bottom);
+            drawBackLines();
+        }
+
+        function drawBackLines() {
+            if (topLeftPath.segments.length > 1 & topRightPath.segments.length > 1) {
+                backTopPath.strokeColor = backPathColor;
+                backTopPath.segments[0].point = topLeftPath.segments[1].point;
+                backTopPath.segments[1].point = topRightPath.segments[1].point;
+            }
+            if (topRightPath.segments.length > 1 & botRightPath.segments.length > 1) {
+                backRightPath.strokeColor = backPathColor;
+                backRightPath.segments[0].point = topRightPath.segments[1].point;
+                backRightPath.segments[1].point = botRightPath.segments[1].point;
+            }
+            if (botRightPath.segments.length > 1 & botLeftPath.segments.length > 1) {
+                backBotPath.strokeColor = backPathColor;
+                backBotPath.segments[0].point = botRightPath.segments[1].point;
+                backBotPath.segments[1].point = botLeftPath.segments[1].point;
+            }
+            if (topLeftPath.segments.length > 1 & botLeftPath.segments.length > 1) {
+                backLeftPath.strokeColor = backPathColor;
+                backLeftPath.segments[0].point = botLeftPath.segments[1].point;
+                backLeftPath.segments[1].point = topLeftPath.segments[1].point;
+            }
         }
 
         function resetVertexStrokeWidth() {
@@ -176,17 +267,42 @@
             botRightPathTest.strokeColor='transparent';
         }
 
+        function testAll() {
+            var score = testTopLeftPath() +  testTopRightPath() + testBotLeftPath() + testBotRightPath();
+            scoreValueText.content = score;
+        }
+
         function testTopLeftPath() {
+            var p1 = topLeftPath.segments[0].point;
+            var p2 = topLeftPath.segments[1].point;
+            topLeftPathTest.segments[1].point.x = (p1.x-p2.x)*((vp.y-p1.y)/(p1.y-p2.y)) + p1.x;
+            topLeftPathTest.segments[1].point.y = vp.y;
             topLeftPathTest.strokeColor='red';
+            return Math.pow(vp.x - topLeftPathTest.segments[1].point.x,2);
         }
         function testTopRightPath() {
+            var p1 = topRightPath.segments[0].point;
+            var p2 = topRightPath.segments[1].point;
+            topRightPathTest.segments[1].point.x = (p1.x-p2.x)*((vp.y-p1.y)/(p1.y-p2.y)) + p1.x;
+            topRightPathTest.segments[1].point.y = vp.y;
             topRightPathTest.strokeColor='red';
+            return Math.pow(vp.x - topRightPathTest.segments[1].point.x,2);
         }
         function testBotLeftPath() {
+            var p1 = botLeftPath.segments[0].point;
+            var p2 = botLeftPath.segments[1].point;
+            botLeftPathTest.segments[1].point.x = (p1.x-p2.x)*((vp.y-p1.y)/(p1.y-p2.y)) + p1.x;
+            botLeftPathTest.segments[1].point.y = vp.y;
             botLeftPathTest.strokeColor='red';
+            return Math.pow(vp.x - botLeftPathTest.segments[1].point.x,2);
         }
         function testBotRightPath() {
+            var p1 = botRightPath.segments[0].point;
+            var p2 = botRightPath.segments[1].point;
+            botRightPathTest.segments[1].point.x = (p1.x-p2.x)*((vp.y-p1.y)/(p1.y-p2.y)) + p1.x;
+            botRightPathTest.segments[1].point.y = vp.y;
             botRightPathTest.strokeColor='red';
+            return Math.pow(vp.x - botRightPathTest.segments[1].point.x,2);
         }
         function randInt(min, max) {
             return Math.floor(Math.random() * (max - min) ) + min;
