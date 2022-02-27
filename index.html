@@ -13,6 +13,10 @@
         back rectangle scoring
         variable difficulty via longer guide lines
         */
+
+        var guidePercent = .5;
+        var pointDistPercent = .25;
+
         var path;
 
         var rect = new Rectangle();
@@ -88,6 +92,26 @@
         botRightPathTest.add(new Point(rect.right, rect.bottom));
         botRightPathTest.add(vp);
 
+        var topLeftPathGuide = new Path();
+        topLeftPathGuide.strokeColor = 'transparent';
+        topLeftPathGuide.add(new Point(rect.left, rect.top));
+        topLeftPathGuide.add(vp);
+        
+        var topRightPathGuide = new Path();
+        topRightPathGuide.strokeColor = 'transparent';
+        topRightPathGuide.add(new Point(rect.right, rect.top));
+        topRightPathGuide.add(vp);
+
+        var botLeftPathGuide = new Path();
+        botLeftPathGuide.strokeColor = 'transparent';
+        botLeftPathGuide.add(new Point(rect.left, rect.bottom));
+        botLeftPathGuide.add(vp);
+
+        var botRightPathGuide = new Path();
+        botRightPathGuide.strokeColor = 'transparent';
+        botRightPathGuide.add(new Point(rect.right, rect.bottom));
+        botRightPathGuide.add(vp);
+
         var backPathColor = 'grey';
         var backTopPath = new Path();
         backTopPath.strokeColor = 'trasparent';
@@ -122,17 +146,23 @@
         scoreValueText.justification = 'left';
         scoreValueText.fillColor = 'black';
 
+        var randDistScale = 1;
+
         function onMouseDrag(event) {
             if (activePath == "none") return;
-            
-            var xoffset = 25;
 
             if (activePath == "topLeft") {
                 if (topLeftPath.segments.length < 2) topLeftPath.add(event.point);
-                if (vp.x < rect.left) xoffset = -xoffset;
-                topLeftPath.segments[1].point.x = event.point.x + xoffset;
-                topLeftPath.segments[1].point.y = event.point.y;
-                topLeftCircle.position = new Point(event.point.x + xoffset, event.point.y);
+
+                var d = dist(event.point, topLeftPath.segments[0].point);
+                var scalingFactor = Math.max(1, d/(dist(topLeftPath.segments[0].point, vp)*pointDistPercent*randDistScale));
+                var x = topLeftPath.segments[0].point.x + (event.point.x - topLeftPath.segments[0].point.x)/scalingFactor;
+                var y = topLeftPath.segments[0].point.y + (event.point.y - topLeftPath.segments[0].point.y)/scalingFactor;
+                
+                topLeftPath.segments[1].point.x = x;
+                topLeftPath.segments[1].point.y = y;
+
+                topLeftCircle.position = new Point(x, y);
             } else if (activePath == "topRight") {
                 if (topRightPath.segments.length < 2) topRightPath.add(event.point);
                 if (vp.x < rect.right) xoffset = -xoffset;
@@ -152,10 +182,11 @@
                 botRightPath.segments[1].point.y = event.point.y;
                 botRightCircle.position = new Point(event.point.x + xoffset, event.point.y);
             }
-            
+            showGuide(event);
         }
         
         function onMouseDown(event) {
+            randDistScale = randInt(100,140)/100;
             if (selectedVertex == "none") return;
             hideAllTestPaths();
             resetVertexStrokeWidth();
@@ -229,6 +260,23 @@
             botLeftCircle.position = new Point(rect.left, rect.bottom);
             botRightCircle.position = new Point(rect.right, rect.bottom);
             drawBackLines();
+            showGuide(event);
+        }
+
+        function showGuide(event) {
+            if (activePath == "topLeft") {
+                topLeftPathGuide.strokeColor = "blue";
+
+                var d = dist(event.point, topLeftPath.segments[0].point);
+                var scalingFactor = Math.max(1, d/(dist(topLeftPath.segments[0].point, vp)*guidePercent));
+
+                console.log(scalingFactor);
+
+                topLeftPathGuide.segments[1].point.y = topLeftPath.segments[0].point.y + (event.point.y - topLeftPath.segments[0].point.y)/scalingFactor;
+                topLeftPathGuide.segments[1].point.x = topLeftPath.segments[0].point.x + (event.point.x - topLeftPath.segments[0].point.x)/scalingFactor;
+            } else {
+                topLeftPathGuide.strokeColor = "transparent";
+            }
         }
 
         function drawBackLines() {
