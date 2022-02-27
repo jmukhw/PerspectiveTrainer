@@ -15,7 +15,7 @@
         */
 
         var guidePercent = .5;
-        var pointDistPercent = .25;
+        var pointDistPercent = .4;
 
         var path;
         var clickStartPoint = new Point(0,0);
@@ -140,6 +140,42 @@
         backBotPath.strokeColor = 'trasparent';
         backBotPath.add(new Point(0,0), new Point(0,0));
 
+        var backGuideColor = '#CCEE55CC';
+        var backGuideArray = [3, 5];
+        var topLeftBackHorizontalGuide = new Path();
+        topLeftBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
+        topLeftBackHorizontalGuide.strokeColor = backGuideColor;
+        topLeftBackHorizontalGuide.dashArray = backGuideArray;
+        var topLeftBackVerticalGuide = new Path();
+        topLeftBackVerticalGuide.add(new Point(0,0), new Point(0,0));
+        topLeftBackVerticalGuide.strokeColor = backGuideColor;
+        topLeftBackVerticalGuide.dashArray = backGuideArray;
+        var topRightBackHorizontalGuide = new Path();
+        topRightBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
+        topRightBackHorizontalGuide.strokeColor = backGuideColor;
+        topRightBackHorizontalGuide.dashArray = backGuideArray;
+        var topRightBackVerticalGuide = new Path();
+        topRightBackVerticalGuide.add(new Point(0,0), new Point(0,0));
+        topRightBackVerticalGuide.strokeColor = backGuideColor;
+        topRightBackVerticalGuide.dashArray = backGuideArray;
+        var botLeftBackHorizontalGuide = new Path();
+        botLeftBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
+        botLeftBackHorizontalGuide.strokeColor = backGuideColor;
+        botLeftBackHorizontalGuide.dashArray = backGuideArray;
+        var botLeftBackVerticalGuide = new Path();
+        botLeftBackVerticalGuide.add(new Point(0,0), new Point(0,0));
+        botLeftBackVerticalGuide.strokeColor = backGuideColor;
+        botLeftBackVerticalGuide.dashArray = backGuideArray;
+        var botRightBackHorizontalGuide = new Path();
+        botRightBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
+        botRightBackHorizontalGuide.strokeColor = backGuideColor;
+        botRightBackHorizontalGuide.dashArray = backGuideArray;
+        var botRightBackVerticalGuide = new Path();
+        botRightBackVerticalGuide.add(new Point(0,0), new Point(0,0));
+        botRightBackVerticalGuide.strokeColor = backGuideColor;
+        botRightBackVerticalGuide.dashArray = backGuideArray;
+        
+
         var buttonTest = new Path.Rectangle(new Rectangle(10,10,100,35),6);
         buttonTest.fillColor='#00000011';
         var buttonTestText = new PointText(buttonTest.position);
@@ -159,6 +195,35 @@
         scoreValueText.content = '0';
         scoreValueText.justification = 'left';
         scoreValueText.fillColor = 'black';
+
+        var buttonDifficulty = new Path.Rectangle(new Rectangle(330,10,100,35),6);
+        buttonDifficulty.fillColor='#00000011';
+        var buttonDifficultyText = new PointText(buttonDifficulty.position);
+        buttonDifficultyText.content = 'Easy';
+        buttonDifficultyText.justification = 'center';
+        buttonDifficultyText.fillColor = 'black';
+        buttonDifficultyText.onMouseDown = buttonDifficulty.onMouseDown = function(event) { buttonDifficulty.fillColor = '#00000033';}
+        buttonDifficultyText.onMouseUp = buttonDifficulty.onMouseUp = function(event) { 
+            if (buttonDifficultyText.content == 'Easy') {
+                buttonDifficultyText.content = 'Moderate';
+                guidePercent = .3;
+                backGuideColor = '#CCEE5599';
+            } else if (buttonDifficultyText.content == 'Moderate') {
+                buttonDifficultyText.content = 'Hard';
+                guidePercent = .1;
+                backGuideColor = '#CCEE5555';
+            } else if (buttonDifficultyText.content == 'Hard') {
+                buttonDifficultyText.content = 'No Help!';
+                guidePercent = 0;
+                backGuideColor = '#CCEE5500';
+            } else if (buttonDifficultyText.content == 'No Help!') {
+                buttonDifficultyText.content = 'Easy';
+                guidePercent = .5;
+                backGuideColor = '#CCEE55CC';
+            } 
+            buttonDifficulty.fillColor = '#00000011';
+        }
+
 
         var randDistScale = 1;
 
@@ -246,7 +311,7 @@
                     botRightCircle.position = new Point(x, y);
                 }
             }
-            //showGuide(event);
+            showGuides();
         }
         
         function onMouseDown(event) {
@@ -258,6 +323,7 @@
             }
             hideAllTestPaths();
             clickStartPoint = event.point;
+            
             
             if (selectedVertex == "topLeft") {  
                 topLeftPath.segments[0].point = new Point(rect.left, rect.top);
@@ -340,28 +406,122 @@
             botLeftCircle.position = new Point(rect.left, rect.bottom);
             botRightCircle.position = new Point(rect.right, rect.bottom);
             drawBackLines();
-            //showGuide(event);
+            hideGuides();
         }
 
-        function showGuide(event) {
+        function showGuides(event) {
             if (activePath == "topLeft") {
                 topLeftPathGuide.strokeColor = "blue";
+                topLeftPathGuide.dashArray = [2,4];
 
-                var d = dist(event.point, topLeftPath.segments[0].point);
-                var scalingFactor = Math.max(1, d/(dist(topLeftPath.segments[0].point, vp)*guidePercent));
+                topLeftPathGuide.segments[0].point.x = topLeftPath.segments[1].point.x;
+                topLeftPathGuide.segments[0].point.y = topLeftPath.segments[1].point.y;
 
-                console.log(scalingFactor);
+                var p1 = topLeftPath.segments[0].point;
+                var p2 = topLeftPath.segments[1].point;
 
-                topLeftPathGuide.segments[1].point.y = topLeftPath.segments[0].point.y + (event.point.y - topLeftPath.segments[0].point.y)/scalingFactor;
-                topLeftPathGuide.segments[1].point.x = topLeftPath.segments[0].point.x + (event.point.x - topLeftPath.segments[0].point.x)/scalingFactor;
-            } else {
-                topLeftPathGuide.strokeColor = "transparent";
+                var targety = topLeftPathGuide.segments[0].point.y + (vp.y - topLeftPathGuide.segments[0].point.y) * guidePercent;
+
+                topLeftPathGuide.segments[1].point.x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
+                topLeftPathGuide.segments[1].point.y = targety;
+
+            } else if (activePath == "topRight") {
+                topRightPathGuide.strokeColor = "blue";
+                topRightPathGuide.dashArray = [2,4];
+
+                topRightPathGuide.segments[0].point.x = topRightPath.segments[1].point.x;
+                topRightPathGuide.segments[0].point.y = topRightPath.segments[1].point.y;
+
+                var p1 = topRightPath.segments[0].point;
+                var p2 = topRightPath.segments[1].point;
+
+                var targety = topRightPathGuide.segments[0].point.y + (vp.y - topRightPathGuide.segments[0].point.y) * guidePercent;
+
+                topRightPathGuide.segments[1].point.x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
+                topRightPathGuide.segments[1].point.y = targety;
+
+            } else if (activePath == "botLeft") {
+                botLeftPathGuide.strokeColor = "blue";
+                botLeftPathGuide.dashArray = [2,4];
+
+                botLeftPathGuide.segments[0].point.x = botLeftPath.segments[1].point.x;
+                botLeftPathGuide.segments[0].point.y = botLeftPath.segments[1].point.y;
+
+                var p1 = botLeftPath.segments[0].point;
+                var p2 = botLeftPath.segments[1].point;
+
+                var targety = botLeftPathGuide.segments[0].point.y + (vp.y - botLeftPathGuide.segments[0].point.y) * guidePercent;
+
+                botLeftPathGuide.segments[1].point.x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
+                botLeftPathGuide.segments[1].point.y = targety;
+
+            } else if (activePath == "botRight") {
+                botRightPathGuide.strokeColor = "blue";
+                botRightPathGuide.dashArray = [2,4];
+
+                botRightPathGuide.segments[0].point.x = botRightPath.segments[1].point.x;
+                botRightPathGuide.segments[0].point.y = botRightPath.segments[1].point.y;
+
+                var p1 = botRightPath.segments[0].point;
+                var p2 = botRightPath.segments[1].point;
+
+                var targety = botRightPathGuide.segments[0].point.y + (vp.y - botRightPathGuide.segments[0].point.y) * guidePercent;
+
+                botRightPathGuide.segments[1].point.x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
+                botRightPathGuide.segments[1].point.y = targety;
             }
+
+            if (topLeftPath.segments[1].point != topLeftPath.segments[0].point) {
+                topLeftBackHorizontalGuide.strokeColor = backGuideColor;
+                topLeftBackHorizontalGuide.segments[0].point = new Point(frame.left, topLeftPath.segments[1].point.y);
+                topLeftBackHorizontalGuide.segments[1].point = new Point(frame.right, topLeftPath.segments[1].point.y);
+                topLeftBackVerticalGuide.strokeColor = backGuideColor;
+                topLeftBackVerticalGuide.segments[0].point = new Point(topLeftPath.segments[1].point.x, frame.top);
+                topLeftBackVerticalGuide.segments[1].point = new Point(topLeftPath.segments[1].point.x, frame.bottom);
+            }
+            if (topRightPath.segments[1].point != topRightPath.segments[0].point) {
+                topRightBackHorizontalGuide.strokeColor = backGuideColor;
+                topRightBackHorizontalGuide.segments[0].point = new Point(frame.left, topRightPath.segments[1].point.y);
+                topRightBackHorizontalGuide.segments[1].point = new Point(frame.right, topRightPath.segments[1].point.y);
+                topRightBackVerticalGuide.strokeColor = backGuideColor;
+                topRightBackVerticalGuide.segments[0].point = new Point(topRightPath.segments[1].point.x, frame.top);
+                topRightBackVerticalGuide.segments[1].point = new Point(topRightPath.segments[1].point.x, frame.bottom);
+            }
+            if (botLeftPath.segments[1].point != botLeftPath.segments[0].point) {
+                botLeftBackHorizontalGuide.strokeColor = backGuideColor;
+                botLeftBackHorizontalGuide.segments[0].point = new Point(frame.left, botLeftPath.segments[1].point.y);
+                botLeftBackHorizontalGuide.segments[1].point = new Point(frame.right, botLeftPath.segments[1].point.y);
+                botLeftBackVerticalGuide.strokeColor = backGuideColor;
+                botLeftBackVerticalGuide.segments[0].point = new Point(botLeftPath.segments[1].point.x, frame.top);
+                botLeftBackVerticalGuide.segments[1].point = new Point(botLeftPath.segments[1].point.x, frame.bottom);
+            }
+            if (botRightPath.segments[1].point != botRightPath.segments[0].point) {
+                botRightBackHorizontalGuide.strokeColor = backGuideColor;
+                botRightBackHorizontalGuide.segments[0].point = new Point(frame.left, botRightPath.segments[1].point.y);
+                botRightBackHorizontalGuide.segments[1].point = new Point(frame.right, botRightPath.segments[1].point.y);
+                botRightBackVerticalGuide.strokeColor = backGuideColor;
+                botRightBackVerticalGuide.segments[0].point = new Point(botRightPath.segments[1].point.x, frame.top);
+                botRightBackVerticalGuide.segments[1].point = new Point(botRightPath.segments[1].point.x, frame.bottom);
+            }
+            
+            
+        }
+        function hideGuides() {
+            topLeftPathGuide.strokeColor = "transparent";
+            topRightPathGuide.strokeColor = "transparent";
+            botLeftPathGuide.strokeColor = "transparent";
+            botRightPathGuide.strokeColor = "transparent";
+            topLeftBackHorizontalGuide.strokeColor = 'transparent';
+            topLeftBackVerticalGuide.strokeColor = 'transparent';
+            topRightBackHorizontalGuide.strokeColor = 'transparent';
+            topRightBackVerticalGuide.strokeColor = 'transparent';
+            botLeftBackHorizontalGuide.strokeColor = 'transparent';
+            botLeftBackVerticalGuide.strokeColor = 'transparent';
+            botRightBackHorizontalGuide.strokeColor = 'transparent';
+            botRightBackVerticalGuide.strokeColor = 'transparent';
         }
 
         function drawBackLines() {
-
-
 
             if (topLeftPath.segments[1].point != topLeftPath.segments[0].point & topRightPath.segments[1].point != topRightPath.segments[0].point) {
                 backTopPath.strokeColor = backPathColor;
