@@ -18,20 +18,30 @@
         var pointDistPercent = .25;
 
         var path;
+        var clickStartPoint = new Point(0,0);
+
+        var frame = new Rectangle();
+        frame.left = 30;
+        frame.right = 600;
+        frame.top = 60;
+        frame.bottom = 400;
+
+        var framePath = new Path.Rectangle(frame);
+        framePath.strokeColor='black';
 
         var rect = new Rectangle();
-        rect.left = randInt(50, 400);
+        rect.left = randInt(frame.left+20, frame.right-120);
         rect.right = rect.left + randInt(50, 100);
-        rect.top = randInt(50, 400);
+        rect.top = randInt(frame.top+20, frame.bottom-120);
         rect.bottom = rect.top + randInt(50, 100);
 
         var rectPath = new Path.Rectangle(rect);
         rectPath.strokeColor='black';
 
-        var vp = new Point(randInt(50,400),randInt(50,400));
+        var vp = new Point(randInt(frame.left + 20,frame.right-20),randInt(frame.top+20, frame.bottom-20));
         var horizonPath = new Path();
         horizonPath.strokeColor='black';
-        horizonPath.add(new Point(30, vp.y), new Point(600, vp.y));
+        horizonPath.add(new Point(frame.left, vp.y), new Point(frame.right, vp.y));
 
         var vpCircle = new Path.Circle(vp, 3);
         vpCircle.fillColor='black';
@@ -64,12 +74,16 @@
         var activePath = "none";
 
         var topLeftPath = new Path();
-        topLeftPath.strokeColor = 'transparent';
+        topLeftPath.add(new Point(rect.left, rect.top), new Point(rect.left, rect.top));
+        topLeftPath.strokeColor = 'black';
         var topRightPath = new Path();
+        topRightPath.add(new Point(rect.right, rect.top), new Point(rect.right, rect.top));
         topRightPath.strokeColor = 'transparent';
         var botLeftPath = new Path();
+        botLeftPath.add(new Point(rect.left, rect.bottom), new Point(rect.left, rect.bottom));
         botLeftPath.strokeColor = 'transparent';
         var botRightPath = new Path();
+        botRightPath.add(new Point(rect.right, rect.bottom), new Point(rect.right, rect.bottom));
         botRightPath.strokeColor = 'transparent';
 
         var topLeftPathTest = new Path();
@@ -151,18 +165,33 @@
         function onMouseDrag(event) {
             if (activePath == "none") return;
 
+            event.point = topLeftPath.segments[0].point - clickStartPoint + event.point;
+
             if (activePath == "topLeft") {
-                if (topLeftPath.segments.length < 2) topLeftPath.add(event.point);
 
                 var d = dist(event.point, topLeftPath.segments[0].point);
                 var scalingFactor = Math.max(1, d/(dist(topLeftPath.segments[0].point, vp)*pointDistPercent*randDistScale));
                 var x = topLeftPath.segments[0].point.x + (event.point.x - topLeftPath.segments[0].point.x)/scalingFactor;
                 var y = topLeftPath.segments[0].point.y + (event.point.y - topLeftPath.segments[0].point.y)/scalingFactor;
                 
+                if (scalingFactor > 1) {
+                    topLeftCircle.strokeColor = 'red';
+                    topLeftPath.strokeColor = 'transparent';
+                    x = topLeftPath.segments[0].point.x;
+                    y = topLeftPath.segments[0].point.y;
+                } else {
+                    topLeftCircle.strokeColor = 'black';
+                    topLeftPath.strokeColor = 'black';
+                }
+
+
                 topLeftPath.segments[1].point.x = x;
                 topLeftPath.segments[1].point.y = y;
 
                 topLeftCircle.position = new Point(x, y);
+
+
+                
             } else if (activePath == "topRight") {
                 if (topRightPath.segments.length < 2) topRightPath.add(event.point);
                 if (vp.x < rect.right) xoffset = -xoffset;
@@ -182,18 +211,23 @@
                 botRightPath.segments[1].point.y = event.point.y;
                 botRightCircle.position = new Point(event.point.x + xoffset, event.point.y);
             }
-            showGuide(event);
+            //showGuide(event);
         }
         
         function onMouseDown(event) {
+
+            selectVertex(event);
             randDistScale = randInt(100,140)/100;
-            if (selectedVertex == "none") return;
+            if (selectedVertex == "none") {
+                return;
+            }
             hideAllTestPaths();
-            resetVertexStrokeWidth();
+            clickStartPoint = event.point;
+            
             if (selectedVertex == "topLeft") {  
-                topLeftPath.add(new Point(rect.left, rect.top));
+                topLeftPath.segments[0].point = new Point(rect.left, rect.top);
                 activePath = "topLeft";
-                topLeftPath.strokeColor='transparent';
+                topLeftPath.strokeColor='green';
                 
                 backLeftPath.strokeColor = 'transparent';
                 backTopPath.strokeColor = 'transparent';
@@ -222,26 +256,36 @@
             }
         }
 
-        function onMouseMove(event) {
+        function selectVertex(event) {
             var grabDist = 50;
-            var circleGrowWidth = 10;
-            resetVertexStrokeWidth()
+            var circleGrowWidth = 5;
+
             if (dist(event.point, topLeftCircle.position) < grabDist) {
+                resetVertexStrokeWidth();
                 topLeftCircle.strokeWidth=circleGrowWidth;
                 selectedVertex = "topLeft";
+
             } else if (dist(event.point, topRightCircle.position) < grabDist) {
+                resetVertexStrokeWidth();
                 topRightCircle.strokeWidth=circleGrowWidth;
                 selectedVertex = "topRight";
+
             } else if (dist(event.point, botLeftCircle.position) < grabDist) {
+                resetVertexStrokeWidth();
                 botLeftCircle.strokeWidth=circleGrowWidth;
                 selectedVertex = "botLeft";
+
             } else if (dist(event.point, botRightCircle.position) < grabDist) {
+                resetVertexStrokeWidth();
                 botRightCircle.strokeWidth=circleGrowWidth;
                 selectedVertex = "botRight";
-            } else {
+
+            } else if (event.point.x < frame.left | event.point.x > frame.right | event.point.y < frame.top | event.point.y > frame.bottom) {
                 selectedVertex = "none";
+                resetVertexStrokeWidth();
             }
         }
+
 
         function onMouseUp(event) {
             if (activePath == "topLeft") {
@@ -253,14 +297,15 @@
             } else if (activePath == "botRight") {
                 botRightPath.strokeColor = 'black';
             }
-            activePath = "none";
-            selectedVertex = "none";
+            
+            //activePath = "none";
+            //selectedVertex = "none";
             topLeftCircle.position = new Point(rect.left, rect.top);
             topRightCircle.position = new Point(rect.right, rect.top);
             botLeftCircle.position = new Point(rect.left, rect.bottom);
             botRightCircle.position = new Point(rect.right, rect.bottom);
             drawBackLines();
-            showGuide(event);
+            //showGuide(event);
         }
 
         function showGuide(event) {
@@ -280,22 +325,25 @@
         }
 
         function drawBackLines() {
-            if (topLeftPath.segments.length > 1 & topRightPath.segments.length > 1) {
+
+
+
+            if (topLeftPath.segments[1].point != topLeftPath.segments[0].point & topRightPath.segments[1].point != topRightPath.segments[0].point) {
                 backTopPath.strokeColor = backPathColor;
                 backTopPath.segments[0].point = topLeftPath.segments[1].point;
                 backTopPath.segments[1].point = topRightPath.segments[1].point;
             }
-            if (topRightPath.segments.length > 1 & botRightPath.segments.length > 1) {
+            if (topRightPath.segments[1].point != topRightPath.segments[0].point & botRightPath.segments[1].point != botRightPath.segments[0].point) {
                 backRightPath.strokeColor = backPathColor;
                 backRightPath.segments[0].point = topRightPath.segments[1].point;
                 backRightPath.segments[1].point = botRightPath.segments[1].point;
             }
-            if (botRightPath.segments.length > 1 & botLeftPath.segments.length > 1) {
+            if (botRightPath.segments[1].point != botRightPath.segments[0].point & botLeftPath.segments[1].point != botLeftPath.segments[0].point) {
                 backBotPath.strokeColor = backPathColor;
                 backBotPath.segments[0].point = botRightPath.segments[1].point;
                 backBotPath.segments[1].point = botLeftPath.segments[1].point;
             }
-            if (topLeftPath.segments.length > 1 & botLeftPath.segments.length > 1) {
+            if (topLeftPath.segments[1].point != topLeftPath.segments[0].point & botLeftPath.segments[1].point != botLeftPath.segments[0].point) {
                 backLeftPath.strokeColor = backPathColor;
                 backLeftPath.segments[0].point = botLeftPath.segments[1].point;
                 backLeftPath.segments[1].point = topLeftPath.segments[1].point;
