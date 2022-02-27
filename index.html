@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Perspective Trainer</title>
     <link rel="stylesheet" href="css/style.css">
+
     <script type="text/javascript" src="js/paper-full.min.js"></script>
     <script type="text/paperscript" canvas="canvas">
 
@@ -15,25 +16,28 @@
         */
 
         var guidePercent = .5;
-        var pointDistPercent = .4;
+        var pointDistPercent = .5;
+        var rectSizeProp = .4;
+        var rectSizePropVar = .35;
+
 
         var path;
         var clickStartPoint = new Point(0,0);
 
         var frame = new Rectangle();
         frame.left = 30;
-        frame.right = 600;
+        frame.right = window.innerWidth-30;
         frame.top = 60;
-        frame.bottom = 400;
+        frame.bottom = window.innerHeight-30;
 
         var framePath = new Path.Rectangle(frame);
         framePath.strokeColor='black';
 
         var rect = new Rectangle();
-        rect.left = randInt(frame.left+20, frame.right-120);
-        rect.right = rect.left + randInt(50, 100);
-        rect.top = randInt(frame.top+20, frame.bottom-120);
-        rect.bottom = rect.top + randInt(50, 100);
+        rect.left = randInt(frame.left+20, frame.right-(frame.right-frame.left)*(rectSizeProp+rectSizePropVar)-30);
+        rect.right = rect.left + randInt((frame.right-frame.left)*(rectSizeProp-rectSizePropVar), (frame.right-frame.left)*(rectSizeProp+rectSizePropVar));
+        rect.top = randInt(frame.top+20, frame.bottom-(frame.bottom-frame.top)*(rectSizeProp+rectSizePropVar)-30);
+        rect.bottom = rect.top + randInt((frame.bottom-frame.top)*(rectSizeProp-rectSizePropVar), (frame.bottom-frame.top)*(rectSizeProp+rectSizePropVar));
 
         var rectPath = new Path.Rectangle(rect);
         rectPath.strokeColor='black';
@@ -228,15 +232,21 @@
         var randDistScale = 1;
 
         function onMouseDrag(event) {
+            var cursorpoint = event.point;
+            if (event.point.x < frame.left) return;
+            if (event.point.x > frame.right) return;
+            if (event.point.y < frame.top) return;
+            if (event.point.y > frame.bottom) return;
+
             if (activePath == "none") return;
 
             if (activePath == "topLeft") {
-                event.point = topLeftPath.segments[0].point - clickStartPoint + event.point;
+                cursorpoint = topLeftPath.segments[0].point - clickStartPoint + cursorpoint;
 
-                var d = dist(event.point, topLeftPath.segments[0].point);
+                var d = dist(cursorpoint, topLeftPath.segments[0].point);
                 var scalingFactor = Math.max(1, d/(dist(topLeftPath.segments[0].point, vp)*pointDistPercent*randDistScale));
-                var x = topLeftPath.segments[0].point.x + (event.point.x - topLeftPath.segments[0].point.x)/scalingFactor;
-                var y = topLeftPath.segments[0].point.y + (event.point.y - topLeftPath.segments[0].point.y)/scalingFactor;
+                var x = topLeftPath.segments[0].point.x + (cursorpoint.x - topLeftPath.segments[0].point.x)/scalingFactor;
+                var y = topLeftPath.segments[0].point.y + (cursorpoint.y - topLeftPath.segments[0].point.y)/scalingFactor;
                 
                 if (scalingFactor > 1) {
                     topLeftCircle.strokeColor = 'red';
@@ -251,12 +261,12 @@
                     topLeftCircle.position = new Point(x, y);
                 }
             } else if (activePath == "topRight") {
-                event.point = topRightPath.segments[0].point - clickStartPoint + event.point;
+                cursorpoint = topRightPath.segments[0].point - clickStartPoint + cursorpoint;
 
-                var d = dist(event.point, topRightPath.segments[0].point);
+                var d = dist(cursorpoint, topRightPath.segments[0].point);
                 var scalingFactor = Math.max(1, d/(dist(topRightPath.segments[0].point, vp)*pointDistPercent*randDistScale));
-                var x = topRightPath.segments[0].point.x + (event.point.x - topRightPath.segments[0].point.x)/scalingFactor;
-                var y = topRightPath.segments[0].point.y + (event.point.y - topRightPath.segments[0].point.y)/scalingFactor;
+                var x = topRightPath.segments[0].point.x + (cursorpoint.x - topRightPath.segments[0].point.x)/scalingFactor;
+                var y = topRightPath.segments[0].point.y + (cursorpoint.y - topRightPath.segments[0].point.y)/scalingFactor;
                 
                 if (scalingFactor > 1) {
                     topRightCircle.strokeColor = 'red';
@@ -271,12 +281,12 @@
                     topRightCircle.position = new Point(x, y);
                 }
             } else if (activePath == "botLeft") {
-                event.point = botLeftPath.segments[0].point - clickStartPoint + event.point;
+                cursorpoint = botLeftPath.segments[0].point - clickStartPoint + cursorpoint;
 
-                var d = dist(event.point, botLeftPath.segments[0].point);
+                var d = dist(cursorpoint, botLeftPath.segments[0].point);
                 var scalingFactor = Math.max(1, d/(dist(botLeftPath.segments[0].point, vp)*pointDistPercent*randDistScale));
-                var x = botLeftPath.segments[0].point.x + (event.point.x - botLeftPath.segments[0].point.x)/scalingFactor;
-                var y = botLeftPath.segments[0].point.y + (event.point.y - botLeftPath.segments[0].point.y)/scalingFactor;
+                var x = botLeftPath.segments[0].point.x + (cursorpoint.x - botLeftPath.segments[0].point.x)/scalingFactor;
+                var y = botLeftPath.segments[0].point.y + (cursorpoint.y - botLeftPath.segments[0].point.y)/scalingFactor;
                 
                 if (scalingFactor > 1) {
                     botLeftCircle.strokeColor = 'red';
@@ -291,12 +301,12 @@
                     botLeftCircle.position = new Point(x, y);
                 }
             } else if (activePath == "botRight") {
-                event.point = botRightPath.segments[0].point - clickStartPoint + event.point;
+                cursorpoint = botRightPath.segments[0].point - clickStartPoint + cursorpoint;
 
-                var d = dist(event.point, botRightPath.segments[0].point);
+                var d = dist(cursorpoint, botRightPath.segments[0].point);
                 var scalingFactor = Math.max(1, d/(dist(botRightPath.segments[0].point, vp)*pointDistPercent*randDistScale));
-                var x = botRightPath.segments[0].point.x + (event.point.x - botRightPath.segments[0].point.x)/scalingFactor;
-                var y = botRightPath.segments[0].point.y + (event.point.y - botRightPath.segments[0].point.y)/scalingFactor;
+                var x = botRightPath.segments[0].point.x + (cursorpoint.x - botRightPath.segments[0].point.x)/scalingFactor;
+                var y = botRightPath.segments[0].point.y + (cursorpoint.y - botRightPath.segments[0].point.y)/scalingFactor;
                 
                 if (scalingFactor > 1) {
                     botRightCircle.strokeColor = 'red';
@@ -315,6 +325,11 @@
         }
         
         function onMouseDown(event) {
+
+            if (event.point.x < frame.left) return;
+            if (event.point.x > frame.right) return;
+            if (event.point.y < frame.top) return;
+            if (event.point.y > frame.bottom) return;
 
             selectVertex(event);
             randDistScale = randInt(100,140)/100;
@@ -408,6 +423,9 @@
             drawBackLines();
             hideGuides();
         }
+        function clamp(min, max, v) {
+            return Math.min(max, Math.max(min, v));
+        }
 
         function showGuides(event) {
             if (activePath == "topLeft") {
@@ -422,8 +440,12 @@
 
                 var targety = topLeftPathGuide.segments[0].point.y + (vp.y - topLeftPathGuide.segments[0].point.y) * guidePercent;
 
-                topLeftPathGuide.segments[1].point.x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
-                topLeftPathGuide.segments[1].point.y = targety;
+                var x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
+                var xclamped = clamp(frame.left, frame.right, x);
+                var scale = (x-p2.x)/(xclamped-p2.x);
+
+                topLeftPathGuide.segments[1].point.x = xclamped;
+                topLeftPathGuide.segments[1].point.y = (targety-p2.y)/scale+p2.y;
 
             } else if (activePath == "topRight") {
                 topRightPathGuide.strokeColor = "blue";
@@ -437,8 +459,12 @@
 
                 var targety = topRightPathGuide.segments[0].point.y + (vp.y - topRightPathGuide.segments[0].point.y) * guidePercent;
 
-                topRightPathGuide.segments[1].point.x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
-                topRightPathGuide.segments[1].point.y = targety;
+                var x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
+                var xclamped = clamp(frame.left, frame.right, x);
+                var scale = (x-p2.x)/(xclamped-p2.x);
+
+                topRightPathGuide.segments[1].point.x = xclamped;
+                topRightPathGuide.segments[1].point.y = (targety-p2.y)/scale+p2.y;
 
             } else if (activePath == "botLeft") {
                 botLeftPathGuide.strokeColor = "blue";
@@ -452,8 +478,12 @@
 
                 var targety = botLeftPathGuide.segments[0].point.y + (vp.y - botLeftPathGuide.segments[0].point.y) * guidePercent;
 
-                botLeftPathGuide.segments[1].point.x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
-                botLeftPathGuide.segments[1].point.y = targety;
+                var x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
+                var xclamped = clamp(frame.left, frame.right, x);
+                var scale = (x-p2.x)/(xclamped-p2.x);
+
+                botLeftPathGuide.segments[1].point.x = xclamped;
+                botLeftPathGuide.segments[1].point.y = (targety-p2.y)/scale+p2.y;
 
             } else if (activePath == "botRight") {
                 botRightPathGuide.strokeColor = "blue";
@@ -467,8 +497,12 @@
 
                 var targety = botRightPathGuide.segments[0].point.y + (vp.y - botRightPathGuide.segments[0].point.y) * guidePercent;
 
-                botRightPathGuide.segments[1].point.x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
-                botRightPathGuide.segments[1].point.y = targety;
+                var x = (p1.x-p2.x)*((targety-p1.y)/(p1.y-p2.y)) + p1.x;
+                var xclamped = clamp(frame.left, frame.right, x);
+                var scale = (x-p2.x)/(xclamped-p2.x);
+
+                botRightPathGuide.segments[1].point.x = xclamped;
+                botRightPathGuide.segments[1].point.y = (targety-p2.y)/scale+p2.y;
             }
 
             if (topLeftPath.segments[1].point != topLeftPath.segments[0].point) {
