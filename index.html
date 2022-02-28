@@ -14,171 +14,60 @@
         back rectangle scoring
         variable difficulty via longer guide lines
         */
-
         var guidePercent = .5;
         var pointDistPercent = .5;
         var rectSizeProp = .4;
         var rectSizePropVar = .35;
 
-
         var path;
         var clickStartPoint = new Point(0,0);
 
         var frame = new Rectangle();
-        frame.left = 30;
-        frame.right = window.innerWidth-30;
-        frame.top = 60;
-        frame.bottom = window.innerHeight-30;
-
         var framePath = new Path.Rectangle(frame);
-        framePath.strokeColor='black';
-
         var rect = new Rectangle();
-        rect.left = randInt(frame.left+20, frame.right-(frame.right-frame.left)*(rectSizeProp+rectSizePropVar)-30);
-        rect.right = rect.left + randInt((frame.right-frame.left)*(rectSizeProp-rectSizePropVar), (frame.right-frame.left)*(rectSizeProp+rectSizePropVar));
-        rect.top = randInt(frame.top+20, frame.bottom-(frame.bottom-frame.top)*(rectSizeProp+rectSizePropVar)-30);
-        rect.bottom = rect.top + randInt((frame.bottom-frame.top)*(rectSizeProp-rectSizePropVar), (frame.bottom-frame.top)*(rectSizeProp+rectSizePropVar));
-
         var rectPath = new Path.Rectangle(rect);
-        rectPath.strokeColor='black';
 
         var vp = new Point(randInt(frame.left + 20,frame.right-20),randInt(frame.top+20, frame.bottom-20));
         var horizonPath = new Path();
-        horizonPath.strokeColor='black';
-        horizonPath.add(new Point(frame.left, vp.y), new Point(frame.right, vp.y));
-
         var vpCircle = new Path.Circle(vp, 3);
-        vpCircle.fillColor='black';
-
         var topLeftCircle = new Path.Circle(new Point(0, 0), 3);
-        topLeftCircle.position = new Point(rect.left, rect.top);
-        topLeftCircle.fillColor='black';
-        topLeftCircle.strokeColor='black';
-        topLeftCircle.strokeWidth=0;
-
         var topRightCircle = new Path.Circle(new Point(0, 0), 3);
-        topRightCircle.position = new Point(rect.right, rect.top);
-        topRightCircle.fillColor='black';
-        topRightCircle.strokeColor='black';
-        topRightCircle.strokeWidth=0;
-
         var botLeftCircle = new Path.Circle(new Point(0, 0), 3);
-        botLeftCircle.position = new Point(rect.left, rect.bottom);
-        botLeftCircle.fillColor='black';
-        botLeftCircle.strokeColor='black';
-        botLeftCircle.strokeWidth=0;
-
         var botRightCircle = new Path.Circle(new Point(0, 0), 3);
-        botRightCircle.position = new Point(rect.right, rect.bottom);
-        botRightCircle.fillColor='black';
-        botRightCircle.strokeColor='black';
-        botRightCircle.strokeWidth=0;
 
         var selectedVertex = "none";
         var activePath = "none";
-
         var topLeftPath = new Path();
-        topLeftPath.add(new Point(rect.left, rect.top), new Point(rect.left, rect.top));
-        topLeftPath.strokeColor = 'black';
         var topRightPath = new Path();
-        topRightPath.add(new Point(rect.right, rect.top), new Point(rect.right, rect.top));
-        topRightPath.strokeColor = 'transparent';
         var botLeftPath = new Path();
-        botLeftPath.add(new Point(rect.left, rect.bottom), new Point(rect.left, rect.bottom));
-        botLeftPath.strokeColor = 'transparent';
         var botRightPath = new Path();
-        botRightPath.add(new Point(rect.right, rect.bottom), new Point(rect.right, rect.bottom));
-        botRightPath.strokeColor = 'transparent';
 
         var topLeftPathTest = new Path();
-        topLeftPathTest.strokeColor = 'transparent';
-        topLeftPathTest.add(new Point(rect.left, rect.top));
-        topLeftPathTest.add(vp);
-        
         var topRightPathTest = new Path();
-        topRightPathTest.strokeColor = 'transparent';
-        topRightPathTest.add(new Point(rect.right, rect.top));
-        topRightPathTest.add(vp);
-
         var botLeftPathTest = new Path();
-        botLeftPathTest.strokeColor = 'transparent';
-        botLeftPathTest.add(new Point(rect.left, rect.bottom));
-        botLeftPathTest.add(vp);
-
         var botRightPathTest = new Path();
-        botRightPathTest.strokeColor = 'transparent';
-        botRightPathTest.add(new Point(rect.right, rect.bottom));
-        botRightPathTest.add(vp);
-
         var topLeftPathGuide = new Path();
-        topLeftPathGuide.strokeColor = 'transparent';
-        topLeftPathGuide.add(new Point(rect.left, rect.top));
-        topLeftPathGuide.add(vp);
-        
         var topRightPathGuide = new Path();
-        topRightPathGuide.strokeColor = 'transparent';
-        topRightPathGuide.add(new Point(rect.right, rect.top));
-        topRightPathGuide.add(vp);
-
         var botLeftPathGuide = new Path();
-        botLeftPathGuide.strokeColor = 'transparent';
-        botLeftPathGuide.add(new Point(rect.left, rect.bottom));
-        botLeftPathGuide.add(vp);
-
         var botRightPathGuide = new Path();
-        botRightPathGuide.strokeColor = 'transparent';
-        botRightPathGuide.add(new Point(rect.right, rect.bottom));
-        botRightPathGuide.add(vp);
 
         var backPathColor = 'grey';
         var backTopPath = new Path();
-        backTopPath.strokeColor = 'trasparent';
-        backTopPath.add(new Point(0,0), new Point(0,0));
         var backLeftPath = new Path();
-        backLeftPath.strokeColor = 'trasparent';
-        backLeftPath.add(new Point(0,0), new Point(0,0));
         var backRightPath = new Path();
-        backRightPath.strokeColor = 'trasparent';
-        backRightPath.add(new Point(0,0), new Point(0,0));
         var backBotPath = new Path();
-        backBotPath.strokeColor = 'trasparent';
-        backBotPath.add(new Point(0,0), new Point(0,0));
 
         var backGuideColor = '#CCEE55CC';
         var backGuideArray = [3, 5];
+
         var topLeftBackHorizontalGuide = new Path();
-        topLeftBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
-        topLeftBackHorizontalGuide.strokeColor = backGuideColor;
-        topLeftBackHorizontalGuide.dashArray = backGuideArray;
         var topLeftBackVerticalGuide = new Path();
-        topLeftBackVerticalGuide.add(new Point(0,0), new Point(0,0));
-        topLeftBackVerticalGuide.strokeColor = backGuideColor;
-        topLeftBackVerticalGuide.dashArray = backGuideArray;
         var topRightBackHorizontalGuide = new Path();
-        topRightBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
-        topRightBackHorizontalGuide.strokeColor = backGuideColor;
-        topRightBackHorizontalGuide.dashArray = backGuideArray;
         var topRightBackVerticalGuide = new Path();
-        topRightBackVerticalGuide.add(new Point(0,0), new Point(0,0));
-        topRightBackVerticalGuide.strokeColor = backGuideColor;
-        topRightBackVerticalGuide.dashArray = backGuideArray;
         var botLeftBackHorizontalGuide = new Path();
-        botLeftBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
-        botLeftBackHorizontalGuide.strokeColor = backGuideColor;
-        botLeftBackHorizontalGuide.dashArray = backGuideArray;
         var botLeftBackVerticalGuide = new Path();
-        botLeftBackVerticalGuide.add(new Point(0,0), new Point(0,0));
-        botLeftBackVerticalGuide.strokeColor = backGuideColor;
-        botLeftBackVerticalGuide.dashArray = backGuideArray;
         var botRightBackHorizontalGuide = new Path();
-        botRightBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
-        botRightBackHorizontalGuide.strokeColor = backGuideColor;
-        botRightBackHorizontalGuide.dashArray = backGuideArray;
         var botRightBackVerticalGuide = new Path();
-        botRightBackVerticalGuide.add(new Point(0,0), new Point(0,0));
-        botRightBackVerticalGuide.strokeColor = backGuideColor;
-        botRightBackVerticalGuide.dashArray = backGuideArray;
-        
 
         var buttonTest = new Path.Rectangle(new Rectangle(10,10,100,35),6);
         buttonTest.fillColor='#00000011';
@@ -228,8 +117,204 @@
             buttonDifficulty.fillColor = '#00000011';
         }
 
+        var buttonNew = new Path.Rectangle(new Rectangle(440,10,100,35),6);
+        buttonNew.fillColor='#00000011';
+        var buttonNewText = new PointText(buttonNew.position);
+        buttonNewText.content = 'Next';
+        buttonNewText.justification = 'center';
+        buttonNewText.fillColor = 'black';
+        buttonNewText.onMouseDown = buttonNew.onMouseDown = function(event) { buttonNew.fillColor = '#00000033';}
+        buttonNewText.onMouseUp = buttonNew.onMouseUp = function(event) { 
+            buttonNew.fillColor='#00000011';
+            initialize();
+        }
 
         var randDistScale = 1;
+
+        initialize();
+
+        function initialize() {
+            frame = new Rectangle();
+            frame.left = 30;
+            frame.right = window.innerWidth-30;
+            frame.top = 60;
+            frame.bottom = window.innerHeight-30;
+
+            framePath.remove();
+
+            framePath = new Path.Rectangle(frame);
+            framePath.strokeColor='black';
+
+            rect.left = randInt(frame.left+20, frame.right-(frame.right-frame.left)*(rectSizeProp+rectSizePropVar)-30);
+            rect.right = rect.left + randInt((frame.right-frame.left)*(rectSizeProp-rectSizePropVar), (frame.right-frame.left)*(rectSizeProp+rectSizePropVar));
+            rect.top = randInt(frame.top+20, frame.bottom-(frame.bottom-frame.top)*(rectSizeProp+rectSizePropVar)-30);
+            rect.bottom = rect.top + randInt((frame.bottom-frame.top)*(rectSizeProp-rectSizePropVar), (frame.bottom-frame.top)*(rectSizeProp+rectSizePropVar));
+            rectPath.remove();
+            rectPath = new Path.Rectangle(rect);
+            
+            rectPath.strokeColor='black';
+
+
+            vp = new Point(randInt(frame.left + 20,frame.right-20),randInt(frame.top+20, frame.bottom-20));
+
+            horizonPath.remove();
+            horizonPath = new Path();
+            horizonPath.strokeColor='black';
+            horizonPath.add(new Point(frame.left, vp.y), new Point(frame.right, vp.y));
+
+            vpCircle.remove();
+            vpCircle = new Path.Circle(vp, 3);
+            vpCircle.fillColor='black';
+
+            topLeftCircle.remove();
+            topLeftCircle = new Path.Circle(new Point(0, 0), 3);
+            topLeftCircle.position = new Point(rect.left, rect.top);
+            topLeftCircle.fillColor='black';
+            topLeftCircle.strokeColor='black';
+            topLeftCircle.strokeWidth=0;
+
+            topRightCircle.remove();
+            topRightCircle = new Path.Circle(new Point(0, 0), 3);
+            topRightCircle.position = new Point(rect.right, rect.top);
+            topRightCircle.fillColor='black';
+            topRightCircle.strokeColor='black';
+            topRightCircle.strokeWidth=0;
+
+            botLeftCircle.remove();
+            botLeftCircle = new Path.Circle(new Point(0, 0), 3);
+            botLeftCircle.position = new Point(rect.left, rect.bottom);
+            botLeftCircle.fillColor='black';
+            botLeftCircle.strokeColor='black';
+            botLeftCircle.strokeWidth=0;
+
+            botRightCircle.remove();
+            botRightCircle = new Path.Circle(new Point(0, 0), 3);
+            botRightCircle.position = new Point(rect.right, rect.bottom);
+            botRightCircle.fillColor='black';
+            botRightCircle.strokeColor='black';
+            botRightCircle.strokeWidth=0;
+
+            selectedVertex = "none";
+            activePath = "none";
+
+            topLeftPath.remove();
+            topLeftPath = new Path();
+            topLeftPath.add(new Point(rect.left, rect.top), new Point(rect.left, rect.top));
+            topLeftPath.strokeColor = 'black';
+            topRightPath.remove();
+            topRightPath = new Path();
+            topRightPath.add(new Point(rect.right, rect.top), new Point(rect.right, rect.top));
+            topRightPath.strokeColor = 'transparent';
+            botLeftPath.remove();
+            botLeftPath = new Path();
+            botLeftPath.add(new Point(rect.left, rect.bottom), new Point(rect.left, rect.bottom));
+            botLeftPath.strokeColor = 'transparent';
+            botRightPath.remove();
+            botRightPath = new Path();
+            botRightPath.add(new Point(rect.right, rect.bottom), new Point(rect.right, rect.bottom));
+            botRightPath.strokeColor = 'transparent';
+
+            topLeftPathTest.remove();
+            topLeftPathTest = new Path();
+            topLeftPathTest.strokeColor = 'transparent';
+            topLeftPathTest.add(new Point(rect.left, rect.top));
+            topLeftPathTest.add(vp);
+            
+            topRightPathTest.remove();
+            topRightPathTest = new Path();
+            topRightPathTest.strokeColor = 'transparent';
+            topRightPathTest.add(new Point(rect.right, rect.top));
+            topRightPathTest.add(vp);
+
+            botLeftPathTest.remove();
+            botLeftPathTest = new Path();
+            botLeftPathTest.strokeColor = 'transparent';
+            botLeftPathTest.add(new Point(rect.left, rect.bottom));
+            botLeftPathTest.add(vp);
+
+            botRightPathTest.remove();
+            botRightPathTest = new Path();
+            botRightPathTest.strokeColor = 'transparent';
+            botRightPathTest.add(new Point(rect.right, rect.bottom));
+            botRightPathTest.add(vp);
+
+            topLeftPathGuide.remove();
+            topLeftPathGuide = new Path();
+            topLeftPathGuide.strokeColor = 'transparent';
+            topLeftPathGuide.add(new Point(rect.left, rect.top));
+            topLeftPathGuide.add(vp);
+            
+            topRightPathGuide.remove();
+            topRightPathGuide = new Path();
+            topRightPathGuide.strokeColor = 'transparent';
+            topRightPathGuide.add(new Point(rect.right, rect.top));
+            topRightPathGuide.add(vp);
+
+            botLeftPathGuide.remove();
+            botLeftPathGuide = new Path();
+            botLeftPathGuide.strokeColor = 'transparent';
+            botLeftPathGuide.add(new Point(rect.left, rect.bottom));
+            botLeftPathGuide.add(vp);
+
+            botRightPathGuide.remove();
+            botRightPathGuide = new Path();
+            botRightPathGuide.strokeColor = 'transparent';
+            botRightPathGuide.add(new Point(rect.right, rect.bottom));
+            botRightPathGuide.add(vp);
+
+
+            backTopPath.remove();
+            backTopPath = new Path();
+            backTopPath.strokeColor = 'trasparent';
+            backTopPath.add(new Point(0,0), new Point(0,0));
+            backLeftPath.remove();
+            backLeftPath = new Path();
+            backLeftPath.strokeColor = 'trasparent';
+            backLeftPath.add(new Point(0,0), new Point(0,0));
+            backRightPath.remove();
+            backRightPath = new Path();
+            backRightPath.strokeColor = 'trasparent';
+            backRightPath.add(new Point(0,0), new Point(0,0));
+            backBotPath.remove();
+            backBotPath = new Path();
+            backBotPath.strokeColor = 'trasparent';
+            backBotPath.add(new Point(0,0), new Point(0,0));
+
+
+            topLeftBackHorizontalGuide = new Path();
+            topLeftBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
+            topLeftBackHorizontalGuide.strokeColor = backGuideColor;
+            topLeftBackHorizontalGuide.dashArray = backGuideArray;
+            topLeftBackVerticalGuide = new Path();
+            topLeftBackVerticalGuide.add(new Point(0,0), new Point(0,0));
+            topLeftBackVerticalGuide.strokeColor = backGuideColor;
+            topLeftBackVerticalGuide.dashArray = backGuideArray;
+            topRightBackHorizontalGuide = new Path();
+            topRightBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
+            topRightBackHorizontalGuide.strokeColor = backGuideColor;
+            topRightBackHorizontalGuide.dashArray = backGuideArray;
+            topRightBackVerticalGuide = new Path();
+            topRightBackVerticalGuide.add(new Point(0,0), new Point(0,0));
+            topRightBackVerticalGuide.strokeColor = backGuideColor;
+            topRightBackVerticalGuide.dashArray = backGuideArray;
+            botLeftBackHorizontalGuide = new Path();
+            botLeftBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
+            botLeftBackHorizontalGuide.strokeColor = backGuideColor;
+            botLeftBackHorizontalGuide.dashArray = backGuideArray;
+            botLeftBackVerticalGuide = new Path();
+            botLeftBackVerticalGuide.add(new Point(0,0), new Point(0,0));
+            botLeftBackVerticalGuide.strokeColor = backGuideColor;
+            botLeftBackVerticalGuide.dashArray = backGuideArray;
+            botRightBackHorizontalGuide = new Path();
+            botRightBackHorizontalGuide.add(new Point(0,0), new Point(0,0));
+            botRightBackHorizontalGuide.strokeColor = backGuideColor;
+            botRightBackHorizontalGuide.dashArray = backGuideArray;
+            botRightBackVerticalGuide = new Path();
+            botRightBackVerticalGuide.add(new Point(0,0), new Point(0,0));
+            botRightBackVerticalGuide.strokeColor = backGuideColor;
+            botRightBackVerticalGuide.dashArray = backGuideArray;
+        }
+
 
         function onMouseDrag(event) {
             var cursorpoint = event.point;
