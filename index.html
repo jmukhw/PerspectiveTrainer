@@ -14,69 +14,75 @@
         back rectangle scoring
         variable difficulty via longer guide lines
         */
-        var palette = ["#fff4e0",
-                       "#8fcccb",
-                       "#449489",
-                       "#285763",
-                       "#2f2b5c",
-                       "#4b3b9c",
-                       "#457cd6",
-                       "#f2b63d",
-                       "#d46e33",
-                       "#e34262",
-                       "#94353d",
-                       "#57253b",
-                       "#9c656c",
-                       "#d1b48c",
-                       "#b4ba47",
-                       "#6d8c32",
-                       "#2c1b2e"];
-        document.body.style.backgroundColor = "#ffffffff";
-        var frameStroke = palette[16];
+        var palette = ["#f2f0e5", // background
+                       "#45444f", // frame stroke
+                       "#4e584a", // rectangle stroke
+                       "#c2d368", // rectangle fill
+                       "#b8b5b9", // vanishing point stroke
+                       "#b8b5b9", // vanishing point fill
+                       "#b8b5b9", // horizon stroke
+                       "#4e584a", // anchor stroke
+                       "#4e584a", // anchor fill
+                       "#8ab060", // anchor ring stroke
+                       "#8ab060", // anchor ring fill
+                       "#8ab060", // anchor ring clicked stroke
+                       "#8ab060", // anchor ring clicked fill
+                       "#8ab060", // box path stroke
+                       "#8ab060", // box unacceptable path stroke
+                       "#6d8c32", // back guide color
+                       "#c2d368", // button hover fill color
+                       "#8ab060", // button click fill color
+                       "b8b5b9", // button disabled fill color
+                       
+                       ];
+
+        var backgroundColor = palette[0]
+        
+        var frameStroke = palette[1];
         var frameFill = palette[0];
         var frameStrokeWidth = 3;
         var frameDashArray = [0];
 
-        var rectStroke = palette[13];
-        var rectFill = palette[13];
+        var rectStroke = palette[2];
+        var rectFill = palette[3];
         var rectStrokeWidth = 2;
         var rectDashArray = [0];
         var rectStrokeAlpha = .75;
         var rectFillAlpha = .2;
 
-        var vpStroke = palette[3];
-        var vpFill = palette[3];
-        var vpStrokeWidth = 10;
+        var vpStroke = palette[4];
+        var vpFill = palette[5];
+        var vpStrokeWidth = 1;
         var vpDashArray = [0];
-        var vpStrokeAlpha = .75;
-        var vpFillAlpha = .75;
+        var vpStrokeAlpha = 1;
+        var vpFillAlpha = 1;
 
-        var horizonStroke = palette[3];
+        var horizonStroke = palette[6];
         var horizonStrokeWidth = 2;
         var horizonStrokeAlpha = .75;
 
-        var anchorStroke = palette[12];
-        var anchorFill = palette[12];
+        var anchorStroke = palette[7];
+        var anchorFill = palette[8];
         var anchorStrokeWidth = 0;
         var anchorDashArray = [0];
         var anchorStrokeAlpha = .75;
         var anchorFillAlpha = 1;
 
         var anchorRingRadius = 10;
-        var anchorRingStroke = palette[12];
-        var anchorRingFill = palette[12] + '00';
+        var anchorRingStroke = palette[9];
+        var anchorRingFill = palette[10] + '00';
         var anchorRingStrokeWidth = 1;
         var anchorRingDashArray = [1,3];
 
         var anchorRingClickRadius = 13;
-        var anchorRingClickStroke = palette[12];
+        var anchorRingClickStroke = palette[11];
         var anchorRingClickFill = palette[12] + '55';
         var anchorRingClickStrokeWidth = 1;
         var anchorRingClickDashArray = [1,3];
         var anchorRingClickTweenDuration = 200;
 
         var boxPathStroke = palette[13];
-        var boxPathStrokeUnacceptable = palette[8];
+        var boxPathStrokeUnacceptable = palette[14];
         var boxPathStrokeWidth = 3;
         var boxPathDashArray = [5,5];
         var boxPathStrokeAlpha = .75;
@@ -86,11 +92,25 @@
         var rectSizeProp = .4;
         var rectSizePropVar = .35;
 
+        var backGuideColor = palette[15];
+
+        var buttonHoverFillColor = palette[16];
+        var buttonClickFillColor = palette[17];
+        var buttonDisabledFillColor = palette[18];
+
+        var currentScore = 0;
+        var nextEnabled = false;
+
+
+        document.body.style.backgroundColor = backgroundColor;
         var path;
         var clickStartPoint = new Point(0,0);
 
         var frame = new Rectangle();
-        var framePath = new Path.Rectangle(frame);
+        var framePath = new Item();
+        var framePathBottomText = new Item();
+        var framePathTopText = new Item();
+        var nextButtonContainer = new Group();
         var rect = new Rectangle();
         var rectPath = new Path.Rectangle(rect);
 
@@ -105,6 +125,15 @@
         var topLeftCircleRing = new Path.Circle({insert: false});
         var topLeftCircleRingClick = new Path.Circle({insert: false});
         var topLeftCircleRingUnclicked = new Path.Circle({insert: false});
+        var topRightCircleRing = new Path.Circle({insert: false});
+        var topRightCircleRingClick = new Path.Circle({insert: false});
+        var topRightCircleRingUnclicked = new Path.Circle({insert: false});
+        var botLeftCircleRing = new Path.Circle({insert: false});
+        var botLeftCircleRingClick = new Path.Circle({insert: false});
+        var botLeftCircleRingUnclicked = new Path.Circle({insert: false});
+        var botRightCircleRing = new Path.Circle({insert: false});
+        var botRightCircleRingClick = new Path.Circle({insert: false});
+        var botRightCircleRingUnclicked = new Path.Circle({insert: false});
 
         var selectedVertex = "none";
         var activePath = "none";
@@ -128,7 +157,7 @@
         var backRightPath = new Path();
         var backBotPath = new Path();
 
-        var backGuideColor = '#CCEE55CC';
+        var backGuideColor = backGuideColor;
         var backGuideArray = [3, 5];
 
         var topLeftBackHorizontalGuide = new Path();
@@ -140,6 +169,7 @@
         var botRightBackHorizontalGuide = new Path();
         var botRightBackVerticalGuide = new Path();
 
+/*
         var buttonTest = new Path.Rectangle(new Rectangle(10,10,100,35),6);
         buttonTest.fillColor='#00000011';
         var buttonTestText = new PointText(buttonTest.position);
@@ -199,7 +229,7 @@
             buttonNew.fillColor='#00000011';
             initialize();
         }
-
+*/
         var randDistScale = 1;
 
         initialize();
@@ -209,15 +239,70 @@
             frame.left = 30;
             frame.right = window.innerWidth-30;
             frame.top = 60;
-            frame.bottom = window.innerHeight-30;
+            frame.bottom = window.innerHeight-50;
 
             framePath.remove();
+            
+            framePath = new CompoundPath({ children: [
+                new Path(new Point(frame.left, frame.top-20), new Point(frame.right/2-frame.right/4, frame.top-20)),
+                new Path(new Point(frame.right/2+frame.right/4, frame.top-20), new Point(frame.right, frame.top-20)),
+                new Path.Rectangle({
+                    topLeft: [frame.right/2-frame.right/4, frame.top-40],
+                    bottomRight: [frame.right/2+frame.right/4, frame.top],
+                    radius: 10}),
+                new Path(new Point(frame.left, frame.bottom+20), new Point(frame.right/2-30, frame.bottom+20)),
+                new Path(new Point(frame.right/2+30, frame.bottom+20), new Point(frame.right/2+45, frame.bottom+20)),
+                new Path(new Point(frame.right/2+75, frame.bottom+20), new Point(frame.right, frame.bottom+20)),
+                new Path.Rectangle({
+                    topLeft: [frame.right/2-30, frame.bottom],
+                    bottomRight: [frame.right/2+30, frame.bottom+40],
+                    radius: 10})
+                    
+                ],
+                fillColor: backgroundColor,
+                strokeColor: frameStroke,
+                strokeWidth: frameStrokeWidth,
+                dashArray: frameDashArray
+            });
 
-            framePath = new Path.Rectangle(frame);
-            framePath.strokeColor = frameStroke;
-            framePath.fillColor = frameFill;
-            framePath.strokeWidth = frameStrokeWidth;
-            framePath.dashArray = frameDashArray;
+            nextButton = new Path.Rectangle({
+                    topLeft: [frame.right/2+45, frame.bottom+5],
+                    bottomRight: [frame.right/2+75, frame.bottom+33],
+                    radius: 10, 
+                    fillColor: backgroundColor,
+                    strokeColor: frameStroke,
+                    strokeWidth: frameStrokeWidth,
+                    dashArray: frameDashArray})
+
+            framePathTopText.remove();
+            framePathBottomText.remove();
+            framePathTopText = new PointText({point: new Point(frame.right/2, frame.top-15), content: "Score: 0", fillColor : frameStroke, justification: "center", fontSize: 20, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+            framePathBottomText = new PointText({point: new Point(frame.right/2, frame.bottom+25), content: "1/10", fillColor : frameStroke, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+            framePathNextText = new PointText({point: new Point(frame.right/2+60, frame.bottom+25), content: "▶", fillColor : frameStroke, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+
+            nextButtonContainer.remove();
+            nextButtonContainer = new Group();
+            nextButtonContainer.addChild(nextButton);
+            nextButtonContainer.addChild(framePathNextText);
+
+            nextButtonContainer.on('mouseenter', function() { if (!nextEnabled) return; this.firstChild.fillColor=buttonHoverFillColor});
+            nextButtonContainer.on('mouseleave', function() {if (!nextEnabled) return; this.firstChild.fillColor=backgroundColor});
+            nextButtonContainer.on('mousedown', function() { if (!nextEnabled) return; this.firstChild.fillColor = buttonClickFillColor; testAll(); });
+            nextButtonContainer.on('mouseup', function() {if (!nextEnabled) return;  hideAllTestPaths(); this.firstChild.fillColor = backgroundColor;});
+            nextButtonContainer.on('frame', function() {
+                if ((topLeftPath.segments[1].point != topLeftPath.segments[0].point) &
+                    (topRightPath.segments[1].point != topRightPath.segments[0].point) &
+                    (botLeftPath.segments[1].point != botLeftPath.segments[0].point) &
+                    (botRightPath.segments[1].point != botRightPath.segments[0].point) &
+                    nextEnabled == false) {
+                    nextEnabled = true; 
+                    this.firstChild.fillColor=backgroundColor;
+                } else if (nextEnabled == false) {
+                    this.firstChild.fillColor=buttonDisabledFillColor;
+                } 
+            });
+
+            new Path.Circle({center: [20,20], radius: 10, fillColor: palette[2]}).onMouseUp = testTopLeftPath;
 
             rect.left = randInt(frame.left+20, frame.right-(frame.right-frame.left)*(rectSizeProp+rectSizePropVar)-30);
             rect.right = rect.left + randInt((frame.right-frame.left)*(rectSizeProp-rectSizePropVar), (frame.right-frame.left)*(rectSizeProp+rectSizePropVar));
@@ -262,6 +347,9 @@
             topLeftCircle.strokeWidth=anchorStrokeWidth;
             topLeftCircle.dashArray = anchorDashArray;
 
+            topLeftCircle.on('mouseenter', function() {this.scale(1.5)});
+            topLeftCircle.on('mouseleave', function() {this.scale(1/1.5)});
+
             topLeftCircleRing.remove();
             topLeftCircleRing = new Path.Circle({position: new Point(rect.left, rect.top), 
                                                  radius: anchorRingRadius,
@@ -282,25 +370,100 @@
                                                 });
 
             topRightCircle.remove();
-            topRightCircle = new Path.Circle(new Point(0, 0), 3);
+            topRightCircle = new Path.Circle(new Point(0, 0), 5);
             topRightCircle.position = new Point(rect.right, rect.top);
-            topRightCircle.fillColor='black';
-            topRightCircle.strokeColor='black';
-            topRightCircle.strokeWidth=0;
+            topRightCircle.fillColor=anchorFill;
+            topRightCircle.fillColor.alpha=anchorFillAlpha;
+            topRightCircle.strokeColor=anchorStroke;
+            topRightCircle.strokeColor.alpha=anchorStrokeAlpha;
+            topRightCircle.strokeWidth=anchorStrokeWidth;
+            topRightCircle.dashArray = anchorDashArray;
+
+            topRightCircle.on('mouseenter', function() {this.scale(1.5)});
+            topRightCircle.on('mouseleave', function() {this.scale(1/1.5)});
+
+            topRightCircleRing.remove();
+            topRightCircleRing = new Path.Circle({position: new Point(rect.right, rect.top), 
+                                                 radius: anchorRingRadius,
+                                                 fillColor: anchorRingFill,
+                                                 strokeColor:anchorRingStroke,
+                                                 strokeWidth:anchorRingStrokeWidth,
+                                                 dashArray : anchorRingDashArray
+                                                });
+            topRightCircleRingUnclicked = topRightCircleRing.clone({insert: false});
+
+            topRightCircleRingClick = new Path.Circle({position: new Point(rect.right, rect.top), 
+                                                 radius: anchorRingClickRadius,
+                                                 fillColor: anchorRingClickFill,
+                                                 strokeColor:anchorRingClickStroke,
+                                                 strokeWidth:anchorRingClickStrokeWidth,
+                                                 dashArray : anchorRingClickDashArray,
+                                                 insert: false
+                                                });
 
             botLeftCircle.remove();
-            botLeftCircle = new Path.Circle(new Point(0, 0), 3);
+            botLeftCircle = new Path.Circle(new Point(0, 0), 5);
             botLeftCircle.position = new Point(rect.left, rect.bottom);
-            botLeftCircle.fillColor='black';
-            botLeftCircle.strokeColor='black';
-            botLeftCircle.strokeWidth=0;
+            botLeftCircle.fillColor=anchorFill;
+            botLeftCircle.fillColor.alpha=anchorFillAlpha;
+            botLeftCircle.strokeColor=anchorStroke;
+            botLeftCircle.strokeColor.alpha=anchorStrokeAlpha;
+            botLeftCircle.strokeWidth=anchorStrokeWidth;
+            botLeftCircle.dashArray = anchorDashArray;
+
+            botLeftCircle.on('mouseenter', function() {this.scale(1.5)});
+            botLeftCircle.on('mouseleave', function() {this.scale(1/1.5)});
+
+            botLeftCircleRing.remove();
+            botLeftCircleRing = new Path.Circle({position: new Point(rect.left, rect.bottom), 
+                                                 radius: anchorRingRadius,
+                                                 fillColor: anchorRingFill,
+                                                 strokeColor:anchorRingStroke,
+                                                 strokeWidth:anchorRingStrokeWidth,
+                                                 dashArray : anchorRingDashArray
+                                                });
+            botLeftCircleRingUnclicked = botLeftCircleRing.clone({insert: false});
+
+            botLeftCircleRingClick = new Path.Circle({position: new Point(rect.left, rect.bottom), 
+                                                 radius: anchorRingClickRadius,
+                                                 fillColor: anchorRingClickFill,
+                                                 strokeColor:anchorRingClickStroke,
+                                                 strokeWidth:anchorRingClickStrokeWidth,
+                                                 dashArray : anchorRingClickDashArray,
+                                                 insert: false
+                                                });
 
             botRightCircle.remove();
-            botRightCircle = new Path.Circle(new Point(0, 0), 3);
+            botRightCircle = new Path.Circle(new Point(0, 0), 5);
             botRightCircle.position = new Point(rect.right, rect.bottom);
-            botRightCircle.fillColor='black';
-            botRightCircle.strokeColor='black';
-            botRightCircle.strokeWidth=0;
+            botRightCircle.fillColor=anchorFill;
+            botRightCircle.fillColor.alpha=anchorFillAlpha;
+            botRightCircle.strokeColor=anchorStroke;
+            botRightCircle.strokeColor.alpha=anchorStrokeAlpha;
+            botRightCircle.strokeWidth=anchorStrokeWidth;
+            botRightCircle.dashArray = anchorDashArray;
+
+            botRightCircle.on('mouseenter', function() {this.scale(1.5)});
+            botRightCircle.on('mouseleave', function() {this.scale(1/1.5)});
+
+            botRightCircleRing.remove();
+            botRightCircleRing = new Path.Circle({position: new Point(rect.right, rect.bottom), 
+                                                 radius: anchorRingRadius,
+                                                 fillColor: anchorRingFill,
+                                                 strokeColor:anchorRingStroke,
+                                                 strokeWidth:anchorRingStrokeWidth,
+                                                 dashArray : anchorRingDashArray
+                                                });
+            botRightCircleRingUnclicked = botRightCircleRing.clone({insert: false});
+
+            botRightCircleRingClick = new Path.Circle({position: new Point(rect.right, rect.bottom), 
+                                                 radius: anchorRingClickRadius,
+                                                 fillColor: anchorRingClickFill,
+                                                 strokeColor:anchorRingClickStroke,
+                                                 strokeWidth:anchorRingClickStrokeWidth,
+                                                 dashArray : anchorRingClickDashArray,
+                                                 insert: false
+                                                });
 
             selectedVertex = "none";
             activePath = "none";
@@ -316,16 +479,30 @@
 
             topRightPath.remove();
             topRightPath = new Path();
+            topRightPath.insertBelow(topRightCircle);
             topRightPath.add(new Point(rect.right, rect.top), new Point(rect.right, rect.top));
-            topRightPath.strokeColor = 'transparent';
+            topRightPath.strokeColor = boxPathStroke;
+            topRightPath.strokeWidth = boxPathStrokeWidth;
+            topRightPath.dashArray = boxPathDashArray;
+            topRightPath.strokeColor.alpha = boxPathStrokeAlpha;
+
             botLeftPath.remove();
             botLeftPath = new Path();
+            botLeftPath.insertBelow(botLeftCircle);
             botLeftPath.add(new Point(rect.left, rect.bottom), new Point(rect.left, rect.bottom));
-            botLeftPath.strokeColor = 'transparent';
+            botLeftPath.strokeColor = boxPathStroke;
+            botLeftPath.strokeWidth = boxPathStrokeWidth;
+            botLeftPath.dashArray = boxPathDashArray;
+            botLeftPath.strokeColor.alpha = boxPathStrokeAlpha;
+
             botRightPath.remove();
             botRightPath = new Path();
+            botRightPath.insertBelow(botRightCircle);
             botRightPath.add(new Point(rect.right, rect.bottom), new Point(rect.right, rect.bottom));
-            botRightPath.strokeColor = 'transparent';
+            botRightPath.strokeColor = boxPathStroke;
+            botRightPath.strokeWidth = boxPathStrokeWidth;
+            botRightPath.dashArray = boxPathDashArray;
+            botRightPath.strokeColor.alpha = boxPathStrokeAlpha;
 
             topLeftPathTest.remove();
             topLeftPathTest = new Path();
@@ -466,11 +643,9 @@
                 var y = topRightPath.segments[0].point.y + (cursorpoint.y - topRightPath.segments[0].point.y)/scalingFactor;
                 
                 if (scalingFactor > 1) {
-                    topRightCircle.strokeColor = 'red';
-                    topRightPath.strokeColor = 'red';
+                    topRightPath.strokeColor = boxPathStrokeUnacceptable;
                 } else {
-                    topRightCircle.strokeColor = 'black';
-                    topRightPath.strokeColor = 'black';
+                    topRightPath.strokeColor = boxPathStroke;
 
                     topRightPath.segments[1].point.x = x;
                     topRightPath.segments[1].point.y = y;
@@ -486,11 +661,9 @@
                 var y = botLeftPath.segments[0].point.y + (cursorpoint.y - botLeftPath.segments[0].point.y)/scalingFactor;
                 
                 if (scalingFactor > 1) {
-                    botLeftCircle.strokeColor = 'red';
-                    botLeftPath.strokeColor = 'red';
+                    botLeftPath.strokeColor = boxPathStroke;
                 } else {
-                    botLeftCircle.strokeColor = 'black';
-                    botLeftPath.strokeColor = 'black';
+                    botLeftPath.strokeColor = boxPathStroke;
 
                     botLeftPath.segments[1].point.x = x;
                     botLeftPath.segments[1].point.y = y;
@@ -506,11 +679,9 @@
                 var y = botRightPath.segments[0].point.y + (cursorpoint.y - botRightPath.segments[0].point.y)/scalingFactor;
                 
                 if (scalingFactor > 1) {
-                    botRightCircle.strokeColor = 'red';
-                    botRightPath.strokeColor = 'red';
+                    botRightPath.strokeColor = boxPathStroke;
                 } else {
-                    botRightCircle.strokeColor = 'black';
-                    botRightPath.strokeColor = 'black';
+                    botRightPath.strokeColor = boxPathStroke;
 
                     botRightPath.segments[1].point.x = x;
                     botRightPath.segments[1].point.y = y;
@@ -545,21 +716,21 @@
                 backTopPath.strokeColor = 'transparent';
 
             } else if (selectedVertex == "topRight") {  
-                topRightPath.add(new Point(rect.right, rect.top));
+                topRightPath.segments[0].point = new Point(rect.right, rect.top);
                 activePath = "topRight";
                 topRightPath.strokeColor='transparent';
                 
                 backRightPath.strokeColor = 'transparent';
                 backTopPath.strokeColor = 'transparent';
             } else if (selectedVertex == "botLeft") {  
-                botLeftPath.add(new Point(rect.left, rect.bottom));
+                botLeftPath.segments[0].point = new Point(rect.left, rect.bottom);
                 activePath = "botLeft";
                 botLeftPath.strokeColor='transparent';
 
                 backLeftPath.strokeColor = 'transparent';
                 backBotPath.strokeColor = 'transparent';
             } else if (selectedVertex == "botRight") {  
-                botRightPath.add(new Point(rect.right, rect.bottom));
+                botRightPath.segments[0].point = new Point(rect.right, rect.bottom);
                 activePath = "botRight";
                 botRightPath.strokeColor='transparent';
 
@@ -569,28 +740,24 @@
         }
 
         function selectVertex(event) {
-            var grabDist = 50;
+            var grabDist = 15;
             var circleGrowWidth = 5;
 
             if (dist(event.point, topLeftCircle.position) < grabDist) {
                 resetVertexStrokeWidth();
-                //topLeftCircle.strokeWidth=circleGrowWidth;
                 selectedVertex = "topLeft";
 
                 changeAnchorRing(topLeftCircleRing, topLeftCircleRingClick);
             } else if (dist(event.point, topRightCircle.position) < grabDist) {
                 resetVertexStrokeWidth();
-                topRightCircle.strokeWidth=circleGrowWidth;
                 selectedVertex = "topRight";
 
             } else if (dist(event.point, botLeftCircle.position) < grabDist) {
                 resetVertexStrokeWidth();
-                botLeftCircle.strokeWidth=circleGrowWidth;
                 selectedVertex = "botLeft";
 
             } else if (dist(event.point, botRightCircle.position) < grabDist) {
                 resetVertexStrokeWidth();
-                botRightCircle.strokeWidth=circleGrowWidth;
                 selectedVertex = "botRight";
 
             } else if (event.point.x < frame.left | event.point.x > frame.right | event.point.y < frame.top | event.point.y > frame.bottom) {
@@ -615,15 +782,16 @@
                 topLeftPath.strokeColor = boxPathStroke;
                 changeAnchorRing(topLeftCircleRing, topLeftCircleRingUnclicked);
             } else if (activePath == "topRight") {
-                topRightPath.strokeColor = 'black';
+                topRightPath.strokeColor = boxPathStroke;
+                changeAnchorRing(topRightCircleRing, topRightCircleRingUnclicked);
             } else if (activePath == "botLeft"){
-                botLeftPath.strokeColor = 'black';
+                botLeftPath.strokeColor = boxPathStroke;
+                changeAnchorRing(botLeftCircleRing, botLeftCircleRingUnclicked);
             } else if (activePath == "botRight") {
-                botRightPath.strokeColor = 'black';
+                botRightPath.strokeColor = boxPathStroke;
+                changeAnchorRing(botRightCircleRing, botRightCircleRingUnclicked);
             }
             
-            //activePath = "none";
-            //selectedVertex = "none";
             topLeftCircle.position = new Point(rect.left, rect.top);
             topRightCircle.position = new Point(rect.right, rect.top);
             botLeftCircle.position = new Point(rect.left, rect.bottom);
@@ -808,17 +976,107 @@
 
         function testAll() {
             var score = testTopLeftPath() +  testTopRightPath() + testBotLeftPath() + testBotRightPath();
-            scoreValueText.content = score;
+            increaseScore(score);
         }
+        var t = new Item();
 
+        function testTopLeftPath() {
+            var p1 = topLeftPath.segments[0].point;
+            var p2 = topLeftPath.segments[1].point;
+            var p2Length = (p2-p1).length;
+            var p3 = new Point((p1.x-p2.x)*((vp.y-p1.y)/(p1.y-p2.y)) + p1.x, vp.y);
+
+            var center = p1;
+            var vector = vp;
+            
+            var from = p1;
+            var through = from.rotate(vector.angle / 2);
+            var to = from.rotate(vector.angle);
+            var end = center + to;
+
+            t.remove();
+            t = new PointText({point: new Point(frame.right-200, frame.bottom/2), content: "▶", fillColor : frameStroke, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+
+            var v1 = p1-p3;
+            var v2 = p1-vp;
+
+
+            var p4 = v1.rotate((v2.angle - v1.angle)/2);
+
+            t.content = "v1: [" + Math.floor(v1.x) + ", " + Math.floor(v1.y) + "] " + Math.floor(v1.angle) + "\n" +
+            "v2: [" + Math.floor(v2.x) + ", " + Math.floor(v2.y) + "] " + Math.floor(v2.angle) + "\n" + 
+            "p4: [" + Math.floor(p4.x) + ", " + Math.floor(p4.y) + "] " + Math.floor(p4.angle);
+
+            //new Path.Circle({position: -v1.normalize()*100+p1, fillColor: 'black', radius: 3}).tween({position: -p4.normalize()*100+p1}, 500);
+
+            var arc = new Path({strokeColor: 'blue', strokeWidth: 2});
+            var start = -v1.normalize()*p2Length+p1;
+            var end = -v2.normalize()*p2Length+p1;
+            var curveSize = Math.abs(v1.angle - v2.angle)*p2Length/200;
+            arc.add(start);
+            arc.add(new Segment(start, new Point(0,0), new Point(0,0)));
+            arc.add(start);
+            //arc.add(new Segment(-p4.normalize()*100+p1, (start-end).normalize(curveSize), (end-start).normalize(curveSize)));
+            //arc.add(end);
+
+            
+
+            /*
+            var arc = new Path.Arc({
+                from: -v1.normalize()*100+p1,
+                to: -v1.normalize()*100+p1,
+                through: -p4.normalize()*100+p1,
+                strokeColor: 'blue',
+                strokeWidth: 2,
+                insert: true
+            });
+
+            arc.tween({
+                'segments[1].point.x': (-v2.normalize()*100+p1).x,
+                'segments[1].point.y': (-v2.normalize()*100+p1).y,
+                'segments[1].handleIn': arc.segments[1].handleIn,
+                'segments[1].handleOut': arc.segments[1].handleOut,
+            }, 500);
+*/            
+            console.log(arc);
+            /*
+            .tween({
+                'segments[2].position': -v2.normalize()*100+p1,
+                'segments[1].position': -p4.normalize()*100+p1,
+            }, 500);
+            */
+
+            var p = new Path({strokeColor: 'red', strokeWidth: 2});
+            p.add(p1, p1);
+            //p.tween({'segments[1].point': p3}, {'easing':'easeOutQuart', 'duration': 1000}).then(function() {p.tween({'segments[1].point': vp}, {'easing':'easeOutQuart', 'duration': 1000})})
+            var tween1 = p.tweenTo({'segments[1].point.x': p3.x, 'segments[1].point.y': p3.y}, {'easing':'easeOutQuart', 'duration': 500})
+                .then(function() {
+                    arc.tween({
+                'segments[1].point.x': (-p4.normalize()*p2Length+p1).x,
+                'segments[1].point.y': (-p4.normalize()*p2Length+p1).y,
+                'segments[1].handleIn': (start-end).normalize(curveSize),
+                'segments[1].handleOut': (end-start).normalize(curveSize),
+                'segments[2].point.x': end.x,
+                'segments[2].point.y': end.y,
+            }, {'easing':'easeOutQuart', 'duration': 500});
+                    p.tweenTo({'segments[1].point.x': vp.x, 'segments[1].point.y': vp.y}, {'easing':'easeOutQuart', 'duration': 500})
+                })
+            //    .then(function() {new Path(new Point())});
+
+            
+            
+        }
+/*
         function testTopLeftPath() {
             var p1 = topLeftPath.segments[0].point;
             var p2 = topLeftPath.segments[1].point;
             topLeftPathTest.segments[1].point.x = (p1.x-p2.x)*((vp.y-p1.y)/(p1.y-p2.y)) + p1.x;
             topLeftPathTest.segments[1].point.y = vp.y;
             topLeftPathTest.strokeColor='red';
+
             return Math.pow(vp.x - topLeftPathTest.segments[1].point.x,2);
         }
+        */
         function testTopRightPath() {
             var p1 = topRightPath.segments[0].point;
             var p2 = topRightPath.segments[1].point;
@@ -845,6 +1103,11 @@
         }
         function randInt(min, max) {
             return Math.floor(Math.random() * (max - min) ) + min;
+        }
+
+        function increaseScore(amt) {
+            currentScore += amt;
+            framePathTopText.content = "Score: " + Math.floor(currentScore);
         }
     </script>
 </head>
