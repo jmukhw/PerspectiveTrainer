@@ -32,8 +32,12 @@
                        "#6d8c32", // back guide color
                        "#c2d368", // button hover fill color
                        "#8ab060", // button click fill color
-                       "b8b5b9", // button disabled fill color
-                       
+                       "#b8b5b9", // button disabled fill color
+                       "#EE6030", // Test Path Stroke
+                       "#EE6030", // testPathArcStrokeColor
+                       "#EE6030", // testScoreDecrementColor
+                       "#45444f" // testScoreItemTotal
+
                        ];
 
         var backgroundColor = palette[0]
@@ -101,6 +105,12 @@
         var currentScore = 0;
         var nextEnabled = false;
 
+        var testPathStrokeColor = palette[19];
+        var testPathArcStrokeColor = palette[20];
+        var testPathArcDashArray = [1,5];
+        var testScoreDecrementColor = palette[21];
+        var testScoreItemTotal = palette[22];
+
 
         document.body.style.backgroundColor = backgroundColor;
         var path;
@@ -110,6 +120,7 @@
         var framePath = new Item();
         var framePathBottomText = new Item();
         var framePathTopText = new Item();
+        var totalScore = 0;
         var nextButtonContainer = new Group();
         var rect = new Rectangle();
         var rectPath = new Path.Rectangle(rect);
@@ -168,6 +179,11 @@
         var botLeftBackVerticalGuide = new Path();
         var botRightBackHorizontalGuide = new Path();
         var botRightBackVerticalGuide = new Path();
+
+        var testScoreTotalText = new Item();
+        var testScoreDecrementText = new Item();
+        var testPathAnimated = new Item();
+        var arc = new Item();
 
 /*
         var buttonTest = new Path.Rectangle(new Rectangle(10,10,100,35),6);
@@ -978,7 +994,7 @@
             var score = testTopLeftPath() +  testTopRightPath() + testBotLeftPath() + testBotRightPath();
             increaseScore(score);
         }
-        var t = new Item();
+        
 
         function testTopLeftPath() {
             var p1 = topLeftPath.segments[0].point;
@@ -994,62 +1010,60 @@
             var to = from.rotate(vector.angle);
             var end = center + to;
 
-            t.remove();
-            t = new PointText({point: new Point(frame.right-200, frame.bottom/2), content: "▶", fillColor : frameStroke, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+            testScoreTotalText.remove();
+            testScoreTotalText = new PointText({point: new Point(frame.right/2, frame.top + 50), content: "", fillColor : testScoreItemTotal, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+            
+            testScoreDecrementText.remove();
+            testScoreDecrementText = new PointText({point: new Point(frame.right/2, frame.top + 50), content: "", fillColor : testScoreDecrementColor, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+
+            testScoreTotalText.content = "★ " + 0 + " ★";
+            testScoreDecrementText.content = "-30";
 
             var v1 = p1-p3;
             var v2 = p1-vp;
 
-
             var p4 = v1.rotate((v2.angle - v1.angle)/2);
 
-            t.content = "v1: [" + Math.floor(v1.x) + ", " + Math.floor(v1.y) + "] " + Math.floor(v1.angle) + "\n" +
-            "v2: [" + Math.floor(v2.x) + ", " + Math.floor(v2.y) + "] " + Math.floor(v2.angle) + "\n" + 
-            "p4: [" + Math.floor(p4.x) + ", " + Math.floor(p4.y) + "] " + Math.floor(p4.angle);
-
-            //new Path.Circle({position: -v1.normalize()*100+p1, fillColor: 'black', radius: 3}).tween({position: -p4.normalize()*100+p1}, 500);
-
-            var arc = new Path({strokeColor: 'blue', strokeWidth: 2});
+            arc.remove();
+            arc = new Path({strokeColor: testPathArcStrokeColor, strokeWidth: 2, dashArray: testPathArcDashArray});
             var start = -v1.normalize()*p2Length+p1;
             var end = -v2.normalize()*p2Length+p1;
             var curveSize = Math.abs(v1.angle - v2.angle)*p2Length/200;
             arc.add(start);
             arc.add(new Segment(start, new Point(0,0), new Point(0,0)));
             arc.add(start);
-            //arc.add(new Segment(-p4.normalize()*100+p1, (start-end).normalize(curveSize), (end-start).normalize(curveSize)));
-            //arc.add(end);
 
-            
+            testPathAnimated.remove();
+            testPathAnimated = new Path({strokeColor: testPathStrokeColor, strokeWidth: 2});
+            testPathAnimated.add(p1, p1);
+            var scoreDecrement = 100-Math.floor(Math.abs(v2.angle - v1.angle));
+            var itemScore = scoreDecrement;
+            var itemScoreTallied = 0;
+            testScoreDecrementText.tweenTo({fillColor: 'transparent'},500).then(function() {testScoreDecrementText.tween(1000).onUpdate = function(event) {
+                var d = Math.pow(event.factor,1/8);
+                testScoreDecrementText.content = Math.floor(scoreDecrement*d);
+                testScoreDecrementText.fillColor = testScoreDecrementColor;
 
+                testScoreDecrementText.point = (p2 + p2.normalize()*20) * (1-d) + ((-p4.normalize()*p2Length+p1)+(-p4.normalize()*p2Length+p1).normalize()*20)*d;
+                if (event.factor == 1) {
+                    testScoreDecrementText.tweenTo({point: testScoreTotalText.point + new Point(0,20), 'fillColor.alpha': .5}, {'easing':'easeOutQuart', 'duration': 250}).then(function() {testScoreDecrementText.tween(500).onUpdate = function(event) {
+                        var d = Math.pow(event.factor,1/2);
+                        testScoreDecrementText.content = Math.floor(scoreDecrement*d);
+                        testScoreTotalText.content = "★ " + (itemScore - scoreDecrement + Math.floor(scoreDecrement*d)) + " ★";
+                        testScoreDecrementText.fillColor.alpha = .5 - (.5*d);
+                    }})
+                }
+
+            }})
             /*
-            var arc = new Path.Arc({
-                from: -v1.normalize()*100+p1,
-                to: -v1.normalize()*100+p1,
-                through: -p4.normalize()*100+p1,
-                strokeColor: 'blue',
-                strokeWidth: 2,
-                insert: true
+            .then(function() {
+                //testScoreDecrementText.tweenTo({'point.x': testScoreTotalText.point.x, 'point.y': testScoreTotalText.point.y}, {'easing':'easeOutQuart', 'duration': 500})
+
+                
             });
-
-            arc.tween({
-                'segments[1].point.x': (-v2.normalize()*100+p1).x,
-                'segments[1].point.y': (-v2.normalize()*100+p1).y,
-                'segments[1].handleIn': arc.segments[1].handleIn,
-                'segments[1].handleOut': arc.segments[1].handleOut,
-            }, 500);
-*/            
-            console.log(arc);
-            /*
-            .tween({
-                'segments[2].position': -v2.normalize()*100+p1,
-                'segments[1].position': -p4.normalize()*100+p1,
-            }, 500);
-            */
-
-            var p = new Path({strokeColor: 'red', strokeWidth: 2});
-            p.add(p1, p1);
+        */
             //p.tween({'segments[1].point': p3}, {'easing':'easeOutQuart', 'duration': 1000}).then(function() {p.tween({'segments[1].point': vp}, {'easing':'easeOutQuart', 'duration': 1000})})
-            var tween1 = p.tweenTo({'segments[1].point.x': p3.x, 'segments[1].point.y': p3.y}, {'easing':'easeOutQuart', 'duration': 500})
+            testPathAnimated.tweenTo({'segments[1].point.x': p3.x, 'segments[1].point.y': p3.y}, {'easing':'easeOutQuart', 'duration': 500})
                 .then(function() {
                     arc.tween({
                 'segments[1].point.x': (-p4.normalize()*p2Length+p1).x,
@@ -1058,8 +1072,8 @@
                 'segments[1].handleOut': (end-start).normalize(curveSize),
                 'segments[2].point.x': end.x,
                 'segments[2].point.y': end.y,
-            }, {'easing':'easeOutQuart', 'duration': 500});
-                    p.tweenTo({'segments[1].point.x': vp.x, 'segments[1].point.y': vp.y}, {'easing':'easeOutQuart', 'duration': 500})
+            }, {'easing':'easeOutQuart', 'duration': 1000});
+                    testPathAnimated.tweenTo({'segments[1].point.x': vp.x, 'segments[1].point.y': vp.y}, {'easing':'easeOutQuart', 'duration': 1000})
                 })
             //    .then(function() {new Path(new Point())});
 
