@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Perspective Trainer</title>
@@ -115,6 +116,7 @@
         var testScoreDecrementColor = palette[21];
         var testScoreItemTotal = palette[22];
 
+        var scoreAnimationSpeedMS = 2000;
 
         document.body.style.backgroundColor = backgroundColor;
         var path;
@@ -252,9 +254,13 @@
 */
         var randDistScale = 1;
 
-        initialize();
+        initialize(1, 1);
 
-        function initialize() {
+        function initialize(difficulty, round) {
+            guidePercent = .3-((difficulty-1)/9)*.3;
+            backGuideColor = '#333E55' + Math.abs(difficulty - 9) + '0';
+
+
             frame = new Rectangle();
             frame.left = 30;
             frame.right = window.innerWidth-30;
@@ -322,7 +328,7 @@
                 } 
             });
 
-            new Path.Circle({center: [20,20], radius: 10, fillColor: palette[2]}).onMouseUp = testTopLeftPath;
+            //new Path.Circle({center: [20,20], radius: 10, fillColor: palette[2]}).onMouseUp = testTopLeftPath;
 
             rect.left = randInt(frame.left+20, frame.right-(frame.right-frame.left)*(rectSizeProp+rectSizePropVar)-30);
             rect.right = rect.left + randInt((frame.right-frame.left)*(rectSizeProp-rectSizePropVar), (frame.right-frame.left)*(rectSizeProp+rectSizePropVar));
@@ -1006,14 +1012,40 @@
             resetVertexStrokeWidth();
             selectedVertex = "none";
 
-            var score = testTopLeftPath() +  testTopRightPath() + testBotLeftPath() + testBotRightPath();
-            increaseScore(score);
+            //var score = testTopLeftPath() +  testTopRightPath() + testBotLeftPath() + testBotRightPath();
+
+            //increaseScore(score);
+            testPath(topLeftPath, scoreAnimationSpeedMS);
+
+            setTimeout(function()  {
+                testPath(topRightPath, scoreAnimationSpeedMS);
+            }, scoreAnimationSpeedMS);
+            setTimeout(function()  {
+                testPath(botLeftPath, scoreAnimationSpeedMS);
+            }, scoreAnimationSpeedMS*2);
+            setTimeout(function()  {
+                testPath(botRightPath, scoreAnimationSpeedMS);
+            }, scoreAnimationSpeedMS*3);
+/*
+            setTimeout(() => {
+                testPath(topRightPath);
+                setTimeout(() => {
+                    testPath(botLeftPath);
+                    setTimeout(() => {
+                        testPath(botRightPath);
+                    }, 2000);
+                }, 2000);
+            }, 2000);
+            */
+            
+            
+            
         }
         
 
-        function testTopLeftPath() {
-            var p1 = topLeftPath.segments[0].point;
-            var p2 = topLeftPath.segments[1].point;
+        function testPath(pathToTest, speedms) {
+            var p1 = pathToTest.segments[0].point;
+            var p2 = pathToTest.segments[1].point;
             var p2Length = (p2-p1).length;
             var p3 = new Point((p1.x-p2.x)*((vp.y-p1.y)/(p1.y-p2.y)) + p1.x, vp.y);
 
@@ -1048,14 +1080,14 @@
             testPathAnimated.add(p1, p1);
             var scoreDecrement = 100-Math.floor(Math.abs(v2.angle - v1.angle));
             totalScore += scoreDecrement;
-            testScoreDecrementText.tweenTo({fillColor: 'transparent'},500).then(function() {testScoreDecrementText.tween(1000).onUpdate = function(event) {
+            testScoreDecrementText.tweenTo({fillColor: 'transparent'},speedms/4).then(function() {testScoreDecrementText.tween(speedms/2).onUpdate = function(event) {
                 var d = Math.pow(event.factor,1/8);
                 testScoreDecrementText.content = Math.floor(scoreDecrement*d);
                 testScoreDecrementText.fillColor = testScoreDecrementColor;
 
                 testScoreDecrementText.point = (p2 + p2.normalize()*20) * (1-d) + ((-p4.normalize()*p2Length+p1)+(-p4.normalize()*p2Length+p1).normalize()*20)*d+v1.normalize().rotate(90)*20;
                 if (event.factor == 1) {
-                    testScoreDecrementText.tweenTo({point: framePathTopText.point + new Point(0,40), 'fillColor.alpha': .5}, {'easing':'easeOutQuart', 'duration': 250}).then(function() {testScoreDecrementText.tween(500).onUpdate = function(event) {
+                    testScoreDecrementText.tweenTo({point: framePathTopText.point + new Point(0,40), 'fillColor.alpha': .5}, {'easing':'easeOutQuart', 'duration': speedms/8}).then(function() {testScoreDecrementText.tween(speedms/8).onUpdate = function(event) {
                         var d = Math.pow(event.factor,1/2);
                         testScoreDecrementText.content = (scoreDecrement < 0 ? "" : "+") + Math.floor(scoreDecrement*d);
                         framePathTopText.content = "Score: " + (totalScore - scoreDecrement + Math.floor(scoreDecrement*d));
@@ -1075,7 +1107,7 @@
             });
         */
             //p.tween({'segments[1].point': p3}, {'easing':'easeOutQuart', 'duration': 1000}).then(function() {p.tween({'segments[1].point': vp}, {'easing':'easeOutQuart', 'duration': 1000})})
-            testPathAnimated.tweenTo({'segments[1].point.x': p3.x, 'segments[1].point.y': p3.y}, {'easing':'easeOutQuart', 'duration': 500})
+            testPathAnimated.tweenTo({'segments[1].point.x': p3.x, 'segments[1].point.y': p3.y}, {'easing':'easeOutQuart', 'duration': speedms/4})
                 .then(function() {
                     arc.tween({
                 'segments[1].point.x': (-p4.normalize()*p2Length+p1).x,
@@ -1084,7 +1116,7 @@
                 'segments[1].handleOut': (end-start).normalize(curveSize),
                 'segments[2].point.x': end.x,
                 'segments[2].point.y': end.y,
-            }, {'easing':'easeOutQuart', 'duration': 1000});
+            }, {'easing':'easeOutQuart', 'duration': speedms/2});
                     testPathAnimated.tweenTo({'segments[1].point.x': vp.x, 'segments[1].point.y': vp.y}, {'easing':'easeOutQuart', 'duration': 1000})
                 });
             //    .then(function() {new Path(new Point())});
@@ -1137,7 +1169,9 @@
         }
     </script>
 </head>
+
 <body>
     <canvas id="canvas" resize></canvas>
 </body>
+
 </html>
