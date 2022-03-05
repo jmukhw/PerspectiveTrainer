@@ -36,7 +36,8 @@
                        "#EE6030", // Test Path Stroke
                        "#EE6030", // testPathArcStrokeColor
                        "#EE6030", // testScoreDecrementColor
-                       "#45444f" // testScoreItemTotal
+                       "#45444f", // testScoreItemTotal
+                       "#EE6030"  // anchor selected color
 
                        ];
 
@@ -71,6 +72,9 @@
         var anchorDashArray = [0];
         var anchorStrokeAlpha = .75;
         var anchorFillAlpha = 1;
+
+        var anchorSelectedStroke = palette[23];
+        var anchorSelectedFill = palette[23];
 
         var anchorRingRadius = 10;
         var anchorRingStroke = palette[9];
@@ -762,19 +766,22 @@
             if (dist(event.point, topLeftCircle.position) < grabDist) {
                 resetVertexStrokeWidth();
                 selectedVertex = "topLeft";
+                topLeftCircle.strokeColor = topLeftCircle.fillColor = anchorSelectedFill;
 
                 changeAnchorRing(topLeftCircleRing, topLeftCircleRingClick);
             } else if (dist(event.point, topRightCircle.position) < grabDist) {
                 resetVertexStrokeWidth();
+                topRightCircle.strokeColor = topRightCircle.fillColor = anchorSelectedFill;
                 selectedVertex = "topRight";
 
             } else if (dist(event.point, botLeftCircle.position) < grabDist) {
                 resetVertexStrokeWidth();
                 selectedVertex = "botLeft";
-
+                botLeftCircle.strokeColor = botLeftCircle.fillColor = anchorSelectedFill;
             } else if (dist(event.point, botRightCircle.position) < grabDist) {
                 resetVertexStrokeWidth();
                 selectedVertex = "botRight";
+                botRightCircle.strokeColor = botRightCircle.fillColor = anchorSelectedFill;
 
             } else if (event.point.x < frame.left | event.point.x > frame.right | event.point.y < frame.top | event.point.y > frame.bottom) {
                 selectedVertex = "none";
@@ -976,6 +983,11 @@
             topRightCircle.strokeWidth=0;
             botLeftCircle.strokeWidth=0;
             botRightCircle.strokeWidth=0;
+            topLeftCircle.strokeColor = topLeftCircle.fillColor = anchorFill;
+            topRightCircle.strokeColor = topRightCircle.fillColor = anchorFill;
+            botLeftCircle.strokeColor = botLeftCircle.fillColor = anchorFill;
+            botRightCircle.strokeColor = botRightCircle.fillColor = anchorFill;
+            
         }
 
         function dist(p1, p2) {
@@ -991,6 +1003,9 @@
         }
 
         function testAll() {
+            resetVertexStrokeWidth();
+            selectedVertex = "none";
+
             var score = testTopLeftPath() +  testTopRightPath() + testBotLeftPath() + testBotRightPath();
             increaseScore(score);
         }
@@ -1010,13 +1025,8 @@
             var to = from.rotate(vector.angle);
             var end = center + to;
 
-            testScoreTotalText.remove();
-            testScoreTotalText = new PointText({point: new Point(frame.right/2, frame.top + 50), content: "", fillColor : testScoreItemTotal, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
-            
             testScoreDecrementText.remove();
             testScoreDecrementText = new PointText({point: new Point(frame.right/2, frame.top + 50), content: "", fillColor : testScoreDecrementColor, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
-
-            testScoreTotalText.content = "★ " + 0 + " ★";
             testScoreDecrementText.content = "-30";
 
             var v1 = p1-p3;
@@ -1037,24 +1047,26 @@
             testPathAnimated = new Path({strokeColor: testPathStrokeColor, strokeWidth: 2});
             testPathAnimated.add(p1, p1);
             var scoreDecrement = 100-Math.floor(Math.abs(v2.angle - v1.angle));
-            var itemScore = scoreDecrement;
-            var itemScoreTallied = 0;
+            totalScore += scoreDecrement;
             testScoreDecrementText.tweenTo({fillColor: 'transparent'},500).then(function() {testScoreDecrementText.tween(1000).onUpdate = function(event) {
                 var d = Math.pow(event.factor,1/8);
                 testScoreDecrementText.content = Math.floor(scoreDecrement*d);
                 testScoreDecrementText.fillColor = testScoreDecrementColor;
 
-                testScoreDecrementText.point = (p2 + p2.normalize()*20) * (1-d) + ((-p4.normalize()*p2Length+p1)+(-p4.normalize()*p2Length+p1).normalize()*20)*d;
+                testScoreDecrementText.point = (p2 + p2.normalize()*20) * (1-d) + ((-p4.normalize()*p2Length+p1)+(-p4.normalize()*p2Length+p1).normalize()*20)*d+v1.normalize().rotate(90)*20;
                 if (event.factor == 1) {
-                    testScoreDecrementText.tweenTo({point: testScoreTotalText.point + new Point(0,20), 'fillColor.alpha': .5}, {'easing':'easeOutQuart', 'duration': 250}).then(function() {testScoreDecrementText.tween(500).onUpdate = function(event) {
+                    testScoreDecrementText.tweenTo({point: framePathTopText.point + new Point(0,40), 'fillColor.alpha': .5}, {'easing':'easeOutQuart', 'duration': 250}).then(function() {testScoreDecrementText.tween(500).onUpdate = function(event) {
                         var d = Math.pow(event.factor,1/2);
-                        testScoreDecrementText.content = Math.floor(scoreDecrement*d);
-                        testScoreTotalText.content = "★ " + (itemScore - scoreDecrement + Math.floor(scoreDecrement*d)) + " ★";
+                        testScoreDecrementText.content = (scoreDecrement < 0 ? "" : "+") + Math.floor(scoreDecrement*d);
+                        framePathTopText.content = "Score: " + (totalScore - scoreDecrement + Math.floor(scoreDecrement*d));
                         testScoreDecrementText.fillColor.alpha = .5 - (.5*d);
+                        arc.strokeColor.alpha = 1-d;
+                        testPathAnimated.strokeColor.alpha = 1-d;
+
                     }})
                 }
 
-            }})
+            }});
             /*
             .then(function() {
                 //testScoreDecrementText.tweenTo({'point.x': testScoreTotalText.point.x, 'point.y': testScoreTotalText.point.y}, {'easing':'easeOutQuart', 'duration': 500})
@@ -1074,7 +1086,7 @@
                 'segments[2].point.y': end.y,
             }, {'easing':'easeOutQuart', 'duration': 1000});
                     testPathAnimated.tweenTo({'segments[1].point.x': vp.x, 'segments[1].point.y': vp.y}, {'easing':'easeOutQuart', 'duration': 1000})
-                })
+                });
             //    .then(function() {new Path(new Point())});
 
             
