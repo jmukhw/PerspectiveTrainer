@@ -189,6 +189,7 @@
         var testScoreTotalText = new Item();
         var testScoreDecrementText = new Item();
         var testPathAnimated = new Item();
+        var testPathAnimated2 = new Item();
         var arc = new Item();
 
 /*
@@ -249,16 +250,31 @@
         buttonNewText.onMouseDown = buttonNew.onMouseDown = function(event) { buttonNew.fillColor = '#00000033';}
         buttonNewText.onMouseUp = buttonNew.onMouseUp = function(event) { 
             buttonNew.fillColor='#00000011';
-            initialize();
+            var t = 2000;
+            testPathLength(backTopPath, true, t);
+
+            setTimeout(function() {
+                testPathLength(backRightPath, false, t);
+            }, t);
+            
+            setTimeout(function() {
+                testPathLength(backBotPath, true, t);
+            }, t*2);
+
+            setTimeout(function() {
+                testPathLength(backLeftPath, false, t);
+            }, t*3);
+            
         }
-*/
+        */
+
         var randDistScale = 1;
 
-        initialize(1, 1);
+        initialize(10, 1);
 
         function initialize(difficulty, round) {
             guidePercent = .3-((difficulty-1)/9)*.3;
-            backGuideColor = '#333E55' + Math.abs(difficulty - 9) + '0';
+            backGuideColor = '#333E55' + Math.abs(difficulty - 10) + '0';
 
 
             frame = new Rectangle();
@@ -327,13 +343,25 @@
                     this.firstChild.fillColor=buttonDisabledFillColor;
                 } 
             });
-
+            vp = new Point(randInt(frame.left + 50,frame.right-50),randInt(frame.top+50, frame.bottom-50));
             //new Path.Circle({center: [20,20], radius: 10, fillColor: palette[2]}).onMouseUp = testTopLeftPath;
+            rect.left=rect.right=rect.top=rect.bottom=0;
 
-            rect.left = randInt(frame.left+20, frame.right-(frame.right-frame.left)*(rectSizeProp+rectSizePropVar)-30);
-            rect.right = rect.left + randInt((frame.right-frame.left)*(rectSizeProp-rectSizePropVar), (frame.right-frame.left)*(rectSizeProp+rectSizePropVar));
-            rect.top = randInt(frame.top+20, frame.bottom-(frame.bottom-frame.top)*(rectSizeProp+rectSizePropVar)-30);
-            rect.bottom = rect.top + randInt((frame.bottom-frame.top)*(rectSizeProp-rectSizePropVar), (frame.bottom-frame.top)*(rectSizeProp+rectSizePropVar));
+            var c = 0;
+            while (((rect.right-rect.left)<100 |
+                   (rect.bottom-rect.top)<100 |
+                   Math.abs(rect.left-vp.x)<50 |
+                   Math.abs(rect.right-vp.x)<50 |
+                   Math.abs(rect.top-vp.y)<50 |
+                   Math.abs(rect.bottom-vp.y)<50) &
+                   c < 100) {
+                c++;       
+                rect.left = randInt(frame.left+20, frame.right-(frame.right-frame.left)*(rectSizeProp+rectSizePropVar)-30);
+                rect.right = rect.left + randInt((frame.right-frame.left)*(rectSizeProp-rectSizePropVar), (frame.right-frame.left)*(rectSizeProp+rectSizePropVar));
+                rect.top = randInt(frame.top+20, frame.bottom-(frame.bottom-frame.top)*(rectSizeProp+rectSizePropVar)-30);
+                rect.bottom = rect.top + randInt((frame.bottom-frame.top)*(rectSizeProp-rectSizePropVar), (frame.bottom-frame.top)*(rectSizeProp+rectSizePropVar));
+            }
+            
             rectPath.remove();
             rectPath = new Path.Rectangle(rect);
             
@@ -344,7 +372,7 @@
             rectPath.fillColor.alpha = rectFillAlpha;
             rectPath.strokeColor.alpha = rectStrokeAlpha;
 
-            vp = new Point(randInt(frame.left + 20,frame.right-20),randInt(frame.top+20, frame.bottom-20));
+            
 
             horizonPath.remove();
             horizonPath = new Path();
@@ -766,7 +794,7 @@
         }
 
         function selectVertex(event) {
-            var grabDist = 15;
+            var grabDist = 40;
             var circleGrowWidth = 5;
 
             if (dist(event.point, topLeftCircle.position) < grabDist) {
@@ -1026,6 +1054,21 @@
             setTimeout(function()  {
                 testPath(botRightPath, scoreAnimationSpeedMS);
             }, scoreAnimationSpeedMS*3);
+
+            setTimeout(function()  {
+                testPathLength(backTopPath, true, scoreAnimationSpeedMS);
+            }, scoreAnimationSpeedMS*4);
+            setTimeout(function()  {
+                testPathLength(backRightPath, false, scoreAnimationSpeedMS);
+            }, scoreAnimationSpeedMS*5);
+            setTimeout(function()  {
+                testPathLength(backBotPath, true, scoreAnimationSpeedMS);
+            }, scoreAnimationSpeedMS*6);
+            setTimeout(function()  {
+                testPathLength(backLeftPath, false, scoreAnimationSpeedMS);
+            }, scoreAnimationSpeedMS*7);
+
+
 /*
             setTimeout(() => {
                 testPath(topRightPath);
@@ -1038,6 +1081,90 @@
             }, 2000);
             */
             
+            
+            
+        }
+
+        function testPathLength(pathToTest, horizontal, speedms) {
+            
+            var p1 = pathToTest.segments[0].point;
+            var p2 = pathToTest.segments[1].point;
+            var p12avg = (p2+p1)/2;
+
+            testPathAnimated.remove();
+            testPathAnimated = new Path({strokeColor: testPathStrokeColor, strokeWidth: 2});
+            testPathAnimated2.remove();
+            testPathAnimated2 = new Path({strokeColor: testPathStrokeColor, strokeWidth: 2});
+            var midBarPath = new Path({strokeColor: testPathStrokeColor, strokeWidth: 2});
+            var p3 = new Point();
+            var p4 = new Point();
+            if (horizontal) {
+                p3 = new Point(new Point(p1.x,p12avg.y));
+                p4 = new Point(new Point(p2.x,p12avg.y));
+            } else {
+                p3 = new Point(new Point(p12avg.x,p1.y));
+                p4 = new Point(new Point(p12avg.x,p2.y));
+            }
+
+            testPathAnimated.add(p3, p4);
+            testPathAnimated2.add(p3, p4);
+            midBarPath.add(p3 + (p4-p3)/2, p3 + (p4-p3)/2);
+
+            var testScoreOffset = new Point(horizontal ? 0 : -(p1-p2).x/2-20, horizontal ? -(p1-p2).y/2-20 : 0);
+            testScoreDecrementText.remove();
+            testScoreDecrementText = new PointText({point: (p1 + p2)/2 + testScoreOffset, content: "", fillColor : testScoreDecrementColor, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+            testScoreDecrementText.content = "-30";
+
+
+            var scoreDecrement = 25-Math.floor(Math.pow(horizontal ? (p1-p2).y : (p1-p2).x,2)/500*25);
+            totalScore += scoreDecrement;
+            testScoreDecrementText.tween(speedms/2).onUpdate = function(event) {
+                var d = Math.pow(event.factor,1/8);
+                testScoreDecrementText.content = Math.floor(scoreDecrement*d);
+                testScoreDecrementText.fillColor = testScoreDecrementColor;
+
+                testScoreDecrementText.point = midBarPath.segments[1].point + testScoreOffset;
+                if (event.factor == 1) {
+                    testScoreDecrementText.tweenTo({point: framePathTopText.point + new Point(0,40), 'fillColor.alpha': .5}, {'easing':'easeOutQuart', 'duration': speedms/8}).then(function() {testScoreDecrementText.tween(speedms/8).onUpdate = function(event) {
+                        var d = Math.pow(event.factor,1/2);
+                        testScoreDecrementText.content = (scoreDecrement < 0 ? "" : "+") + Math.floor(scoreDecrement*d);
+                        framePathTopText.content = "Score: " + (totalScore - scoreDecrement + Math.floor(scoreDecrement*d));
+                        testScoreDecrementText.fillColor.alpha = .5 - (.5*d);
+                        
+                        testPathAnimated.strokeColor.alpha = 1-d;
+                        testPathAnimated2.strokeColor.alpha = 1-d;
+                        midBarPath.strokeColor.alpha = 1-d;
+
+                    }})
+                }
+
+            }
+
+            
+            testPathAnimated.tweenTo({
+                'segments[0].point.x': p1.x, 
+                'segments[0].point.y': p1.y,
+                'segments[1].point.x': horizontal ? p2.x : p1.x, 
+                'segments[1].point.y': horizontal ? p1.y : p2.y
+            }, {'easing':'easeOutQuart', 'duration': speedms/4});
+
+            testPathAnimated2.tweenTo({
+                'segments[0].point.x': horizontal ? p1.x : p2.x, 
+                'segments[0].point.y': horizontal ? p2.y : p1.y,
+                'segments[1].point.x': p2.x, 
+                'segments[1].point.y': p2.y
+            }, {'easing':'easeOutQuart', 'duration': speedms/4});
+
+            midBarPath.tweenTo({
+                'segments[0].point.x': horizontal ? p1.x + (p2.x-p1.x)/2 : p1.x, 
+                'segments[0].point.y': horizontal ? p1.y : p1.y + (p2.y-p1.y)/2,
+                'segments[1].point.x': horizontal ? p1.x + (p2.x-p1.x)/2 : p2.x, 
+                'segments[1].point.y': horizontal ? p2.y : p1.y + (p2.y-p1.y)/2
+            }, {'easing':'easeOutQuart', 'duration': speedms/4});
+
+            setTimeout(function() {
+                midBarPath.remove();
+            }, speedms);
             
             
         }
@@ -1078,7 +1205,7 @@
             testPathAnimated.remove();
             testPathAnimated = new Path({strokeColor: testPathStrokeColor, strokeWidth: 2});
             testPathAnimated.add(p1, p1);
-            var scoreDecrement = 100-Math.floor(Math.abs(v2.angle - v1.angle));
+            var scoreDecrement = 25-Math.floor(Math.abs(v2.angle - v1.angle));
             totalScore += scoreDecrement;
             testScoreDecrementText.tweenTo({fillColor: 'transparent'},speedms/4).then(function() {testScoreDecrementText.tween(speedms/2).onUpdate = function(event) {
                 var d = Math.pow(event.factor,1/8);
