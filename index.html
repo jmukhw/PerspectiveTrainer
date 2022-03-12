@@ -15,30 +15,33 @@
         back rectangle scoring
         variable difficulty via longer guide lines
         */
-        var palette = ["#f2f0e5", // background
-                       "#45444f", // frame stroke
-                       "#4e584a", // rectangle stroke
-                       "#c2d368", // rectangle fill
-                       "#b8b5b9", // vanishing point stroke
-                       "#b8b5b9", // vanishing point fill
-                       "#b8b5b9", // horizon stroke
-                       "#4e584a", // anchor stroke
-                       "#4e584a", // anchor fill
-                       "#8ab060", // anchor ring stroke
-                       "#8ab060", // anchor ring fill
-                       "#8ab060", // anchor ring clicked stroke
-                       "#8ab060", // anchor ring clicked fill
-                       "#8ab060", // box path stroke
-                       "#8ab060", // box unacceptable path stroke
-                       "#6d8c32", // back guide color
-                       "#c2d368", // button hover fill color
-                       "#8ab060", // button click fill color
-                       "#b8b5b9", // button disabled fill color
-                       "#EE6030", // Test Path Stroke
-                       "#EE6030", // testPathArcStrokeColor
-                       "#EE6030", // testScoreDecrementColor
-                       "#45444f", // testScoreItemTotal
-                       "#EE6030"  // anchor selected color
+        var palette = ["#f2f0e5", //0 background
+                       "#45444f", //1 frame stroke
+                       "#4e584a", //2 rectangle stroke
+                       "#c2d368", //3 rectangle fill
+                       "#b8b5b9", //4 vanishing point stroke
+                       "#b8b5b9", //5 vanishing point fill
+                       "#b8b5b9", //6 horizon stroke
+                       "#4e584a", //7 anchor stroke
+                       "#4e584a", //8 anchor fill
+                       "#8ab060", //9 anchor ring stroke
+                       "#8ab060", //10 anchor ring fill
+                       "#8ab060", //11 anchor ring clicked stroke
+                       "#8ab060", //12 anchor ring clicked fill
+                       "#8ab060", //13 box path stroke
+                       "#8ab060", //14 box unacceptable path stroke
+                       "#6d8c32", //15 back guide color
+                       "#c2d368", //16 button hover fill color
+                       "#8ab060", //17 button click fill color
+                       "#b8b5b9", //18 button disabled fill color
+                       "#EE6030", //19 Test Path Stroke
+                       "#EE6030", //20 testPathArcStrokeColor
+                       "#EE6030", //21 testScoreDecrementColor
+                       "#45444f", //22 testScoreItemTotal
+                       "#EE6030", //23 anchor selected color
+                       "#EE6030", //24 new best score color
+                       "#D2D0C5", //25 help panel background
+                       "#D2E398"  //26 button default fill
 
                        ];
 
@@ -115,6 +118,9 @@
         var testPathArcDashArray = [1,5];
         var testScoreDecrementColor = palette[21];
         var testScoreItemTotal = palette[22];
+        var newBestScoreColor = palette[23];
+        var helpPanelBackground = palette[25];
+        var buttonDefaultFill = palette[26];
 
         var scoreAnimationSpeedMS = 2000;
 
@@ -191,91 +197,28 @@
         var testPathAnimated = new Item();
         var testPathAnimated2 = new Item();
         var arc = new Item();
+        var newRecordText = new Item();
 
-/*
-        var buttonTest = new Path.Rectangle(new Rectangle(10,10,100,35),6);
-        buttonTest.fillColor='#00000011';
-        var buttonTestText = new PointText(buttonTest.position);
-        buttonTestText.content = 'Test';
-        buttonTestText.justification = 'center';
-        buttonTestText.fillColor = 'black';
-        buttonTestText.onMouseDown = buttonTest.onMouseDown = function(event) { testAll(); buttonTest.fillColor = '#00000033';}
-        buttonTestText.onMouseUp = buttonTest.onMouseUp = function(event) { hideAllTestPaths(); buttonTest.fillColor = '#00000011';}
-        
-        var scorePanel = new Path.Rectangle(new Rectangle(120,10,200,35),6);
-        scorePanel.fillColor='#00000011';
-        var scoreLabelText = new PointText(scorePanel.position + new Point(-80, 0));
-        scoreLabelText.content = 'Score:';
-        scoreLabelText.justification = 'left';
-        scoreLabelText.fillColor = 'black';
-        var scoreValueText = new PointText(scorePanel.position + new Point(-40, 0));
-        scoreValueText.content = '0';
-        scoreValueText.justification = 'left';
-        scoreValueText.fillColor = 'black';
+        var helpButton = new Item();
+        var helpButtonText = new Item();
+        var helpButtonContainer = new Item();
+        var helpPanel = new Item();
+        var helpPanelText = new Item();
+        var helpPanelContainer = new Item();
 
-        var buttonDifficulty = new Path.Rectangle(new Rectangle(330,10,100,35),6);
-        buttonDifficulty.fillColor='#00000011';
-        var buttonDifficultyText = new PointText(buttonDifficulty.position);
-        buttonDifficultyText.content = 'Easy';
-        buttonDifficultyText.justification = 'center';
-        buttonDifficultyText.fillColor = 'black';
-        buttonDifficultyText.onMouseDown = buttonDifficulty.onMouseDown = function(event) { buttonDifficulty.fillColor = '#00000033';}
-        buttonDifficultyText.onMouseUp = buttonDifficulty.onMouseUp = function(event) { 
-            if (buttonDifficultyText.content == 'Easy') {
-                buttonDifficultyText.content = 'Moderate';
-                guidePercent = .3;
-                backGuideColor = '#CCEE5599';
-            } else if (buttonDifficultyText.content == 'Moderate') {
-                buttonDifficultyText.content = 'Hard';
-                guidePercent = .1;
-                backGuideColor = '#CCEE5555';
-            } else if (buttonDifficultyText.content == 'Hard') {
-                buttonDifficultyText.content = 'No Help!';
-                guidePercent = 0;
-                backGuideColor = '#CCEE5500';
-            } else if (buttonDifficultyText.content == 'No Help!') {
-                buttonDifficultyText.content = 'Easy';
-                guidePercent = .5;
-                backGuideColor = '#CCEE55CC';
-            } 
-            buttonDifficulty.fillColor = '#00000011';
-        }
-
-        var buttonNew = new Path.Rectangle(new Rectangle(440,10,100,35),6);
-        buttonNew.fillColor='#00000011';
-        var buttonNewText = new PointText(buttonNew.position);
-        buttonNewText.content = 'Next';
-        buttonNewText.justification = 'center';
-        buttonNewText.fillColor = 'black';
-        buttonNewText.onMouseDown = buttonNew.onMouseDown = function(event) { buttonNew.fillColor = '#00000033';}
-        buttonNewText.onMouseUp = buttonNew.onMouseUp = function(event) { 
-            buttonNew.fillColor='#00000011';
-            var t = 2000;
-            testPathLength(backTopPath, true, t);
-
-            setTimeout(function() {
-                testPathLength(backRightPath, false, t);
-            }, t);
-            
-            setTimeout(function() {
-                testPathLength(backBotPath, true, t);
-            }, t*2);
-
-            setTimeout(function() {
-                testPathLength(backLeftPath, false, t);
-            }, t*3);
-            
-        }
-        */
+        var bestScore = 0;
 
         var randDistScale = 1;
 
         initialize(10, 1);
 
         function initialize(difficulty, round) {
+            newRecordText.remove();
+            totalScore = 0;
             guidePercent = .3-((difficulty-1)/9)*.3;
             backGuideColor = '#333E55' + Math.abs(difficulty - 10) + '0';
 
+            
 
             frame = new Rectangle();
             frame.left = 30;
@@ -286,20 +229,15 @@
             framePath.remove();
             
             framePath = new CompoundPath({ children: [
-                new Path(new Point(frame.left, frame.top-20), new Point(frame.right/2-frame.right/4, frame.top-20)),
-                new Path(new Point(frame.right/2+frame.right/4, frame.top-20), new Point(frame.right, frame.top-20)),
+                new Path(new Point(frame.left, frame.top-20), new Point(frame.left + (frame.right-frame.left)/2-(frame.right-frame.left)/4, frame.top-20)),
+                new Path(new Point(frame.left + (frame.right-frame.left)/2+(frame.right-frame.left)/4, frame.top-20), new Point(frame.right-50, frame.top-20)),
+                new Path(new Point(frame.right-20, frame.top-20), new Point(frame.right, frame.top-20)),
                 new Path.Rectangle({
-                    topLeft: [frame.right/2-frame.right/4, frame.top-40],
-                    bottomRight: [frame.right/2+frame.right/4, frame.top],
+                    topLeft: [frame.left + (frame.right-frame.left)/2-(frame.right-frame.left)/4, frame.top-50],
+                    bottomRight: [frame.left + (frame.right-frame.left)/2+(frame.right-frame.left)/4, frame.top],
                     radius: 10}),
-                new Path(new Point(frame.left, frame.bottom+20), new Point(frame.right/2-30, frame.bottom+20)),
-                new Path(new Point(frame.right/2+30, frame.bottom+20), new Point(frame.right/2+45, frame.bottom+20)),
-                new Path(new Point(frame.right/2+75, frame.bottom+20), new Point(frame.right, frame.bottom+20)),
-                new Path.Rectangle({
-                    topLeft: [frame.right/2-30, frame.bottom],
-                    bottomRight: [frame.right/2+30, frame.bottom+40],
-                    radius: 10})
-                    
+                new Path(new Point(frame.left, frame.bottom+20), new Point(frame.left + (frame.right-frame.left)/2-30, frame.bottom+20)),
+                new Path(new Point((frame.right-frame.left)/2+30, frame.bottom+20), new Point(frame.right, frame.bottom+20))
                 ],
                 fillColor: backgroundColor,
                 strokeColor: frameStroke,
@@ -308,19 +246,61 @@
             });
 
             nextButton = new Path.Rectangle({
-                    topLeft: [frame.right/2+45, frame.bottom+5],
-                    bottomRight: [frame.right/2+75, frame.bottom+33],
-                    radius: 10, 
-                    fillColor: backgroundColor,
+                topLeft: [frame.left + (frame.right-frame.left)/2-30, frame.bottom],
+                    bottomRight: [frame.left + (frame.right-frame.left)/2+30, frame.bottom+40],
+                    radius: 10,
+                    fillColor: buttonDefaultFill,
                     strokeColor: frameStroke,
                     strokeWidth: frameStrokeWidth,
                     dashArray: frameDashArray})
 
+            helpButton = new Path.Rectangle({
+                topLeft: [frame.right - 50, frame.top-40],
+                    bottomRight: [frame.right - 20, frame.top-5],
+                    radius: 10,
+                    fillColor: buttonDefaultFill,
+                    strokeColor: frameStroke,
+                    strokeWidth: frameStrokeWidth,
+                    dashArray: frameDashArray})
+            helpButtonText.remove();
+            helpButtonText = new PointText({point: new Point(frame.right - 35, frame.top - 15), content: "?", fillColor : frameStroke, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+            helpButtonContainer.remove();
+            helpButtonContainer = new Group();
+            helpButtonContainer.addChild(helpButton);
+            helpButtonContainer.addChild(helpButtonText);
+
+            helpButtonContainer.on('mouseenter', function() { this.firstChild.fillColor=buttonHoverFillColor});
+            helpButtonContainer.on('mouseleave', function() { this.firstChild.fillColor=buttonDefaultFill});
+            helpButtonContainer.on('mousedown', function() { this.firstChild.fillColor = buttonClickFillColor; setHelpPanelVisible(true)});
+            helpButtonContainer.on('mouseup', function() { this.firstChild.fillColor = buttonDefaultFill; setHelpPanelVisible(false)});
+
+            helpPanelText.remove();
+            helpPanelText = new PointText({point: new Point(frame.left + (frame.right-frame.left)/2, frame.top + (frame.bottom-frame.top)/2), fillColor : frameStroke, justification: "center", fontSize: 20, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+            helpPanelText.content = "Select each of the corners of the box\nand drag toward the vanishing point.\nOnce a corner is selected you can\npress anywhere to start dragging it.\n" +
+            "\n Once you've positioned all four back\nvertices in proper 1-point perspective,\npress the button at the bottom to see\nhow well you did."
+
+            helpPanel.remove();
+            helpPanel = new Path.Rectangle({
+                topLeft: [helpPanelText.point.x-helpPanelText.bounds.width/2-20, helpPanelText.point.y-40],
+                    bottomRight: [helpPanelText.point.x+helpPanelText.bounds.width/2+20, helpPanelText.point.y+helpPanelText.bounds.height],
+                    radius: 10,
+                    fillColor: helpPanelBackground,
+                    strokeColor: frameStroke,
+                    strokeWidth: frameStrokeWidth,
+                    dashArray: frameDashArray});
+            
+            helpPanelContainer.remove();
+            helpPanelContainer = new Group();
+            helpPanelContainer.addChild(helpPanel);
+            helpPanelContainer.addChild(helpPanelText);
+            helpPanelContainer.opacity = 0;
+
+
             framePathTopText.remove();
             framePathBottomText.remove();
-            framePathTopText = new PointText({point: new Point(frame.right/2, frame.top-15), content: "Score: 0", fillColor : frameStroke, justification: "center", fontSize: 20, fontFamily: 'Georgia, serif', fontWeight: '1000'});
-            framePathBottomText = new PointText({point: new Point(frame.right/2, frame.bottom+25), content: "1/10", fillColor : frameStroke, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
-            framePathNextText = new PointText({point: new Point(frame.right/2+60, frame.bottom+25), content: "▶", fillColor : frameStroke, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+            framePathTopText = new PointText({point: new Point(frame.left + (frame.right-frame.left)/2, frame.top-30), content: "Score: 0", fillColor : frameStroke, justification: "center", fontSize: 20, fontFamily: 'Georgia, serif', fontWeight: '1000'});
+            framePathBottomText = new PointText({point: new Point(frame.left + (frame.right-frame.left)/2, frame.top-10), content: "Best: " + bestScore, fillColor : frameStroke, justification: "center", fontSize: 12, fontFamily: 'Georgia, serif', fontWeight: '100'});
+            framePathNextText = new PointText({point: new Point(frame.left + (frame.right-frame.left)/2, frame.bottom+25), content: "▶", fillColor : frameStroke, justification: "center", fontSize: 18, fontFamily: 'Georgia, serif', fontWeight: '1000'});
 
             nextButtonContainer.remove();
             nextButtonContainer = new Group();
@@ -328,9 +308,9 @@
             nextButtonContainer.addChild(framePathNextText);
 
             nextButtonContainer.on('mouseenter', function() { if (!nextEnabled) return; this.firstChild.fillColor=buttonHoverFillColor});
-            nextButtonContainer.on('mouseleave', function() {if (!nextEnabled) return; this.firstChild.fillColor=backgroundColor});
-            nextButtonContainer.on('mousedown', function() { if (!nextEnabled) return; this.firstChild.fillColor = buttonClickFillColor; testAll(); });
-            nextButtonContainer.on('mouseup', function() {if (!nextEnabled) return;  hideAllTestPaths(); this.firstChild.fillColor = backgroundColor;});
+            nextButtonContainer.on('mouseleave', function() {if (!nextEnabled) return; this.firstChild.fillColor=buttonDefaultFill});
+            nextButtonContainer.on('mousedown', function() { if (!nextEnabled) return; this.firstChild.fillColor = buttonClickFillColor; testAll();  });
+            nextButtonContainer.on('mouseup', function() {if (!nextEnabled) return;  this.firstChild.fillColor = buttonDefaultFill; });
             nextButtonContainer.on('frame', function() {
                 if ((topLeftPath.segments[1].point != topLeftPath.segments[0].point) &
                     (topRightPath.segments[1].point != topRightPath.segments[0].point) &
@@ -338,7 +318,7 @@
                     (botRightPath.segments[1].point != botRightPath.segments[0].point) &
                     nextEnabled == false) {
                     nextEnabled = true; 
-                    this.firstChild.fillColor=backgroundColor;
+                    this.firstChild.fillColor=buttonDefaultFill;
                 } else if (nextEnabled == false) {
                     this.firstChild.fillColor=buttonDisabledFillColor;
                 } 
@@ -658,6 +638,18 @@
             botRightBackVerticalGuide.strokeColor = backGuideColor;
             botRightBackVerticalGuide.dashArray = backGuideArray;
             
+
+
+
+        }
+
+        function setHelpPanelVisible(visibilityBool) {
+            if (visibilityBool) {
+                helpPanelContainer.bringToFront();
+                helpPanelContainer.opacity = 1;
+            } else {
+                helpPanelContainer.opacity = 0;
+            }
         }
 
 
@@ -1067,6 +1059,26 @@
             setTimeout(function()  {
                 testPathLength(backLeftPath, false, scoreAnimationSpeedMS);
             }, scoreAnimationSpeedMS*7);
+
+            setTimeout(function() {
+                if (totalScore > bestScore) {
+                    newRecordText.remove();
+                    newRecordText = new PointText({point: new Point(frame.left + frame.right/2, frame.top + frame.bottom/2), content: "New Best Score!", fillColor : newBestScoreColor, justification: "center", fontSize: 0, fontFamily: 'Georgia, serif', fontWeight: '1000'})
+                    newRecordText.tweenTo({fontSize: 50}, {'duration': scoreAnimationSpeedMS, 'easing': 'easeOutQuart'})
+                }
+            }, scoreAnimationSpeedMS*8); 
+            setTimeout(function() {
+                    if (totalScore > bestScore) {
+                        newRecordText.tweenTo({fontSize: 0}, {'duration': scoreAnimationSpeedMS, 'easing': 'easeOutQuart'})
+                    }
+                }, scoreAnimationSpeedMS*9); 
+            setTimeout(function() {
+                if (totalScore > bestScore) {
+                    bestScore = totalScore;
+                }
+                initialize(10,1);
+            }, scoreAnimationSpeedMS*10); 
+
 
 
 /*
